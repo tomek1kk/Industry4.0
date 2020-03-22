@@ -25,7 +25,7 @@ Kolejnym krokiem będzie rozpoczęcie implementacji naszego rozwiązania. Chcemy
 * https://przemysl-40.pl/wp-content/uploads/2018-Od-Industry-4.0-do-Smart-Factory.pdf?fbclid=IwAR2YLQg0IKb1hF-6zvRZ9Rc3tPgk8-BLyL0klefOIDLCDZ20akBuMUl6z10
 * https://www.daimler.com/innovation/case/connectivity/industry-4-0.html
 * https://www.youtube.com/watch?v=4XLqdYZWq9I&fbclid=IwAR0Vj7iarAVDCY-NNVKn3YeFq8aNvDtjm7F5DLwT99jQo5f0psty-mOkUok
-youtube.com/watch?v=4l_THuN9QxE&fbclid=IwAR3UJxVPlo92zlTPMQ33TFdKuxUGMYS2_JwIwknJH4A-eQsA7dcq0M7K7UU
+* https://www.youtube.com/watch?v=4l_THuN9QxE&fbclid=IwAR3UJxVPlo92zlTPMQ33TFdKuxUGMYS2_JwIwknJH4A-eQsA7dcq0M7K7UU
 * https://www.sciencedirect.com/science/article/pii/S2405896318314332
 * https://www.youtube.com/watch?v=uwfuYam8-Wk&fbclid=IwAR2lc43zLPhmo_TiskCp5htvq4wHz9PNFbIteyK4_WkC2goYzxlJwwndNwY
 
