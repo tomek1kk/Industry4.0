@@ -1,0 +1,98 @@
+{
+	"$schema": "http://json-schema.org/schema#",
+	"type": "object",
+	"required": ["machines", "products", "simulation"],
+	"properties": {
+		"machines": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"required": ["id", "products"],
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"products": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": ["name", "productionTime"],
+							"properties": {
+								"name": {
+									"type": "string"
+								},
+								"productionTime": {
+									"type": "integer",
+									"minimum": 0
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"products": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"required": ["name", "subproducts"],
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"subproducts": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					}
+				}
+			}
+		},
+		"simulation": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"required": ["duration", "demandedProducts"],
+				"properties": {
+					"duration": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"demandedProducts": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": ["name", "amount", "priority"],
+							"properties": {
+								"name": {
+									"type": "string"
+								},
+								"amount": {
+									"type": "integer",
+									"minimum": 1
+								},
+								"priority": {
+									"type": "integer",
+									"minimum": 1,
+									"maximum": 10
+								}
+							}
+						}
+					},
+					"breakdowns": {
+					    "type": "array",
+						"items": {
+						    "type": "object",
+							"required": ["machineId", "duration"],
+							"properties":{
+							    "machineId": {"type": "integer"},
+								"duration": {"type": "integer", "minimum": 1}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

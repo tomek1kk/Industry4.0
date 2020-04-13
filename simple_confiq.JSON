@@ -1,0 +1,115 @@
+{
+	"machines": [{
+			"id": 1,
+			"products": [{
+				"name": "shoe",
+				"productionTime": 60
+			}]
+		},
+		{
+			"id": 2,
+			"products": [{
+					"name": "shoe",
+					"productionTime": 120
+				},
+				{
+					"name": "upper",
+					"productionTime": 240
+				},
+				{
+					"name": "shoelace",
+					"productionTime": 120
+				},
+				{
+					"name": "sole",
+					"productionTime": 300
+				}
+			]
+		},
+		{
+			"id": 3,
+			"products": [{
+				"name": "shoelace",
+				"productionTime": 40
+			}]
+		},
+		{
+			"id": 4,
+			"products": [{
+				"name": "upper",
+				"productionTime": 100
+			}]
+		},
+		{
+			"id": 4,
+			"products": [{
+				"name": "sole",
+				"productionTime": 200
+			}]
+		}
+	],
+	"products": [{
+			"name": "shoe",
+			"subproducts": ["upper", "shoelace", "sole"]
+		},
+		{
+			"name": "upper",
+			"subproducts": []
+		},
+		{
+			"name": "shoelace",
+			"subproducts": []
+		},
+		{
+			"name": "sole",
+			"subproducts": []
+		}
+	],
+	"simulation": [{
+			"duration": 7200,
+			"demandedProducts": [{
+					"name": "shoe",
+					"amount": 100,
+					"priority": 2
+				},
+				{
+					"name": "shoelace",
+					"amount": 300,
+					"priority": 5
+				}
+			]
+		},
+		{
+			"duration": 3600,
+			"demandedProducts": [{
+					"name": "shoe",
+					"amount": 50,
+					"priority": 4
+				},
+				{
+					"name": "shoelace",
+					"amount": 300,
+					"priority": 1
+				}
+			]
+		},
+		{
+			"duration": 3600,
+			"demandedProducts": [{
+					"name": "shoe",
+					"amount": 50,
+					"priority": 4
+				},
+				{
+					"name": "shoelace",
+					"amount": 300,
+					"priority": 1
+				}
+			],
+			"breakdowns": [{
+				"machineId": 1,
+				"duration": 1800
+			}]
+		}
+	]
+}
