@@ -1,6 +1,7 @@
 package industry;
 
 import com.google.gson.reflect.TypeToken;
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.*;
 
@@ -11,6 +12,7 @@ import com.google.gson.JsonParser;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
+import javafx.util.Pair;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -18,11 +20,12 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class ManagerAgent extends Agent {
+    private List<Pair<String, Machine>> machineAgents = new ArrayList<Pair<String, Machine>>();
+
     protected void parseMachineObject(JsonObject machine, InformationCenter ic) {
         int id = machine.get("id").getAsInt();
         HashMap<String, Integer> prods = new HashMap<String, Integer>();
@@ -47,6 +50,36 @@ public class ManagerAgent extends Agent {
         Simulation s = new Simulation(simulation.get("duration").getAsInt(), users);
         ic.addSimulation(s);
     }
+
+    protected void addNewMachineAgent(Machine machine, Collection<Machine> machines, HashMap<String, Product> products) {
+        ContainerController cc = getContainerController();
+        AgentController ac = null;
+        try {
+            String agentName = "Machine" + machine.id;
+            machineAgents.add(new Pair<>(agentName, machine));
+            HashMap<String, List<Pair<String, Machine>>> productsSubmachines = new HashMap<String, List<Pair<String, Machine>>>();
+            machine.products.forEach((name, product)-> {
+                List<String> blockedBy = products.get(name).blockedBy;
+                productsSubmachines.put(name, machines.stream().filter(m -> containsAny(m.products, blockedBy)).map(m-> new Pair<>("Machine" + m.id, m)).collect(Collectors.toList()));
+            });
+            Object[] args = new Object[1];
+            args[0] = new MachineAgentArguments(machine, productsSubmachines);
+            ac = cc.createNewAgent(agentName, "industry.MachineAgent", args);
+
+            ac.start();
+        } catch (StaleProxyException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private boolean containsAny(HashMap<String, Integer> map, List<String> list) {
+        for (String candidate : list) {
+            if (map.containsKey(candidate))
+                return true;
+        }
+        return false;
+    }
+
     protected void setup() {
         Behaviour readConfiguration = new OneShotBehaviour() {
             @Override
@@ -68,16 +101,9 @@ public class ManagerAgent extends Agent {
 
                         JsonArray simulations = jsonObject.get("simulation").getAsJsonArray();
                         simulations.forEach(s -> parseSimulationObject(s.getAsJsonObject(), ic));
-
-                        ContainerController cc = getContainerController();
-                        ic.machines.forEach((key, value)-> {
-                            AgentController ac = null;
-                            try {
-                                ac = cc.createNewAgent("Machine" + key.toString(), "industry.MachineAgent", null);
-                                ac.start();
-                            } catch (StaleProxyException e) {
-                                e.printStackTrace();
-                            }
+                        
+                        ic.machines.forEach((id, machine)-> {
+                            addNewMachineAgent(machine, ic.machines.values(), ic.products);
                         });
                         reader.close();
 
