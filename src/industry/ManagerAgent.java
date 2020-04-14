@@ -8,6 +8,9 @@ import com.google.gson.*;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
+import jade.wrapper.AgentController;
+import jade.wrapper.ContainerController;
+import jade.wrapper.StaleProxyException;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -53,7 +56,7 @@ public class ManagerAgent extends Agent {
                 Reader reader = null;
                 JsonParser parser = new JsonParser();
                 try {
-                        reader = Files.newBufferedReader(Paths.get("Y:\\Desktop\\industry4.0\\simple_confiq.JSON"));
+                        reader = Files.newBufferedReader(Paths.get("simple_confiq.JSON"));
                         JsonElement jsonTree = parser.parse(reader);
                         JsonObject jsonObject = jsonTree.getAsJsonObject();
 
@@ -66,7 +69,18 @@ public class ManagerAgent extends Agent {
                         JsonArray simulations = jsonObject.get("simulation").getAsJsonArray();
                         simulations.forEach(s -> parseSimulationObject(s.getAsJsonObject(), ic));
 
+                        ContainerController cc = getContainerController();
+                        ic.machines.forEach((key, value)-> {
+                            AgentController ac = null;
+                            try {
+                                ac = cc.createNewAgent("Machine" + key.toString(), "industry.MachineAgent", null);
+                                ac.start();
+                            } catch (StaleProxyException e) {
+                                e.printStackTrace();
+                            }
+                        });
                         reader.close();
+
                     }
                 catch (Exception e) {
                         e.printStackTrace();
