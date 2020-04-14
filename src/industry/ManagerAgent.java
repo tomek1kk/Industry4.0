@@ -1,174 +1,76 @@
-//package industry;
-//
-//import jade.core.Agent;
-//import jade.core.behaviours.*;
-//
-//import com.google.gson.*;
-//
-//import java.io.FileNotFoundException;
-//import java.io.FileReader;
-//import java.util.ArrayList;
-//import java.util.HashMap;
-//
-//public class ManagerAgent extends Agent {
-//    protected void parseMachineObject(JSONObject machine, InformationCenter ic) throws JSONException {
-//        int id = machine.getInt("id");
-//        HashMap<String, Integer> prods = new HashMap<String, Integer>();
-//        JSONArray products = machine.getJSONArray("products");
-//        for (int i=0; i < products.length(); i++) {
-//            JSONObject obj = products.getJSONObject(i);
-//            prods.put(obj.getString("name"), obj.getInt("productionTime"));
-//        }
-//        Machine m = new Machine(id, prods);
-//        ic.addMachine(m);
-//    }
-//
-//    protected void parseProductObject(JSONObject product, InformationCenter ic) throws JSONException {
-//        ArrayList<String> subproducts = new ArrayList<String>();
-//        JSONArray subprods = product.getJSONArray("subproducts");
-//        for (int i=0; i < subprods.length(); i++) {
-//            JSONObject obj = subprods.getJSONObject(i);
-//            //subproducts.add((String)obj);
-//        }
-//        Product p = new Product(product.getString("name"), subproducts);
-//        ic.addProduct(p);
-//    }
-//
-//    protected void parseSimulationObject(JSONObject simulation, InformationCenter ic)
-//    {
-//        return;
-//    }
-//    protected void setup() {
-//        Behaviour readConfiguration = new OneShotBehaviour() {
-//            @Override
-//            public void action() {
-//                InformationCenter ic = new InformationCenter();
-//                Gson gson = new Gson();
-//                try {
-//
-//                    Object object = gson.fromJson(new FileReader("simple_config.json"), Object.class);
-//
-//
-//                } catch (FileNotFoundException e) {
-//                    e.printStackTrace();
-//                }
-////
-////
-////                    JSONArray machines = obj.getJSONArray("machines");
-////                    JSONArray products = obj.getJSONArray("products");
-////                    JSONArray simulation = obj.getJSONArray("simulation");
-////                    System.out.println("READ JSON");
-////
-////                    for (int i=0; i < machines.length(); i++) {
-////                        parseMachineObject(machines.getJSONObject(i), ic);
-////                    }
-////                    for (int i=0; i < products.length(); i++) {
-////                        parseProductObject(products.getJSONObject(i), ic);
-////                    }
-////                    for (int i=0; i < simulation.length(); i++) {
-////                        parseSimulationObject(simulation.getJSONObject(i), ic);
-////                    }
-////                } catch (Exception e) {
-////                    e.printStackTrace();
-////                }
-//            }
-//        };
-//        addBehaviour(readConfiguration);
-//    }
-//
-//    @Override
-//    protected void takeDown() {
-//        super.takeDown();
-//    }
-//}
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
 package industry;
 
+import com.google.gson.reflect.TypeToken;
 import jade.core.Agent;
-import jade.core.behaviours.Behaviour;
-import jade.core.behaviours.CyclicBehaviour;
-import jade.core.behaviours.OneShotBehaviour;
-import org.json.*;
+import jade.core.behaviours.*;
 
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import com.google.gson.*;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParser;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class ManagerAgent extends Agent {
-    protected void parseMachineObject(JSONObject machine, InformationCenter ic) throws JSONException {
-        int id = machine.getInt("id");
+    protected void parseMachineObject(JsonObject machine, InformationCenter ic) {
+        int id = machine.get("id").getAsInt();
         HashMap<String, Integer> prods = new HashMap<String, Integer>();
-        JSONArray products = machine.getJSONArray("products");
-        for (int i=0; i < products.length(); i++) {
-            JSONObject obj = products.getJSONObject(i);
-            prods.put(obj.getString("name"), obj.getInt("productionTime"));
-        }
+        JsonArray products = machine.get("products").getAsJsonArray();
+        products.forEach(p-> prods.put(p.getAsJsonObject().get("name").getAsString(), p.getAsJsonObject().get("productionTime").getAsInt()));
         Machine m = new Machine(id, prods);
         ic.addMachine(m);
     }
 
-    protected void parseProductObject(JSONObject product, InformationCenter ic) throws JSONException {
+    protected void parseProductObject(JsonObject product, InformationCenter ic) {
         ArrayList<String> subproducts = new ArrayList<String>();
-        JSONArray subprods = product.getJSONArray("subproducts");
-        for (int i=0; i < subprods.length(); i++) {
-            JSONObject obj = subprods.getJSONObject(i);
-            //subproducts.add((String)obj);
-        }
-        Product p = new Product(product.getString("name"), subproducts);
+        JsonArray subprods = product.get("subproducts").getAsJsonArray();
+        subprods.forEach(p -> subproducts.add(p.getAsString()));
+        Product p = new Product(product.get("name").getAsString(), subproducts);
         ic.addProduct(p);
     }
 
-    protected void parseSimulationObject(JSONObject simulation, InformationCenter ic)
-    {
-        return;
+    protected void parseSimulationObject(JsonObject simulation, InformationCenter ic) {
+        JsonArray simulations = simulation.get("demandedProducts").getAsJsonArray();
+        ArrayList<DemandedProduct> users = new ArrayList<DemandedProduct>();
+        simulations.forEach(p-> users.add( new DemandedProduct(p.getAsJsonObject().get("name").getAsString(),p.getAsJsonObject().get("amount").getAsInt(), p.getAsJsonObject().get("priority").getAsInt())));
+        Simulation s = new Simulation(simulation.get("duration").getAsInt(), users);
+        ic.addSimulation(s);
     }
     protected void setup() {
         Behaviour readConfiguration = new OneShotBehaviour() {
             @Override
             public void action() {
                 InformationCenter ic = new InformationCenter();
-                JSONParser jsonParser = new JSONParser();
-                try (FileReader reader = new FileReader("simple_config.json"))
-                {
-                    //Read JSON file
-                    JSONObject obj = (JSONObject) jsonParser.parse(reader);
+                Gson gson = new Gson();
+                Reader reader = null;
+                JsonParser parser = new JsonParser();
+                try {
+                        reader = Files.newBufferedReader(Paths.get("Y:\\Desktop\\industry4.0\\simple_confiq.JSON"));
+                        JsonElement jsonTree = parser.parse(reader);
+                        JsonObject jsonObject = jsonTree.getAsJsonObject();
 
-                    JSONArray machines = obj.getJSONArray("machines");
-                    JSONArray products = obj.getJSONArray("products");
-                    JSONArray simulation = obj.getJSONArray("simulation");
-                    System.out.println("READ JSON");
+                        JsonArray machines = jsonObject.get("machines").getAsJsonArray();
+                        machines.forEach(m-> parseMachineObject(m.getAsJsonObject(), ic));
 
-                    for (int i=0; i < machines.length(); i++) {
-                        parseMachineObject(machines.getJSONObject(i), ic);
+                        JsonArray products =  jsonObject.get("products").getAsJsonArray();
+                        products.forEach(p-> parseProductObject(p.getAsJsonObject(), ic));
+
+                        JsonArray simulations = jsonObject.get("simulation").getAsJsonArray();
+                        simulations.forEach(s -> parseSimulationObject(s.getAsJsonObject(), ic));
+
+                        reader.close();
                     }
-                    for (int i=0; i < products.length(); i++) {
-                        parseProductObject(products.getJSONObject(i), ic);
+                catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    for (int i=0; i < simulation.length(); i++) {
-                        parseSimulationObject(simulation.getJSONObject(i), ic);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
             }
         };
         addBehaviour(readConfiguration);
