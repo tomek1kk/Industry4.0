@@ -51,23 +51,33 @@ public class ManagerAgent extends Agent {
         ic.addSimulation(s);
     }
 
-    protected void addNewMachineAgent(Machine machine) {
+    protected void addNewMachineAgent(Machine machine, Collection<Machine> machines, HashMap<String, Product> products) {
         ContainerController cc = getContainerController();
         AgentController ac = null;
         try {
+            String agentName = "Machine" + machine.id;
+            machineAgents.add(new Pair<>(agentName, machine));
             HashMap<String, List<Pair<String, Machine>>> productsSubmachines = new HashMap<String, List<Pair<String, Machine>>>();
             machine.products.forEach((name, product)-> {
-                productsSubmachines.put(name, machineAgents.stream().filter(m -> m.getValue().products.containsKey(name)).collect(Collectors.toList()));
+                List<String> blockedBy = products.get(name).blockedBy;
+                productsSubmachines.put(name, machines.stream().filter(m -> containsAny(m.products, blockedBy)).map(m-> new Pair<>("Machine" + m.id, m)).collect(Collectors.toList()));
             });
             Object[] args = new Object[1];
             args[0] = new MachineAgentArguments(machine, productsSubmachines);
-            String agentName = "Machine" + machine.id;
             ac = cc.createNewAgent(agentName, "industry.MachineAgent", args);
-            machineAgents.add(new Pair<>(agentName, machine));
+
             ac.start();
         } catch (StaleProxyException e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean containsAny(HashMap<String, Integer> map, List<String> list) {
+        for (String candidate : list) {
+            if (map.containsKey(candidate))
+                return true;
+        }
+        return false;
     }
 
     protected void setup() {
@@ -91,10 +101,9 @@ public class ManagerAgent extends Agent {
 
                         JsonArray simulations = jsonObject.get("simulation").getAsJsonArray();
                         simulations.forEach(s -> parseSimulationObject(s.getAsJsonObject(), ic));
-
-
+                        
                         ic.machines.forEach((id, machine)-> {
-                            addNewMachineAgent(machine);
+                            addNewMachineAgent(machine, ic.machines.values(), ic.products);
                         });
                         reader.close();
 

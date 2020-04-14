@@ -22,9 +22,8 @@ public class MachineAgent extends Agent {
             public void action() {
                 System.out.println(getAID().getLocalName() + " started");
                 productMachines.forEach((product, machines)-> {
-                    System.out.println("Product: " + product + ". Available machines:");
                     machines.forEach(m -> {
-                        System.out.println("Machine agent name: " + m.getKey());
+                        System.out.println("I'm " + getAID().getLocalName() + " and I produce " + product + " Machine that can help me: " + m.getKey());
                     });
                 });
             }
