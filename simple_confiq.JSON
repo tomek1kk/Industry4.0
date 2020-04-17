@@ -9,13 +9,13 @@
             {
                "productName":"car",
                "stageId":1,
-               "actionId":1,
+               "actionName":"main body assembly",
                "productionTime":60
             },
             {
                "productName":"engine",
                "stageId":1,
-               "actionId":1,
+               "actionName":"engine assembly",
                "productionTime":500
             }
          ]
@@ -29,7 +29,7 @@
             {
                "productName":"engine",
                "stageId":1,
-               "actionId":1,
+               "actionName":"engine assembly",
                "productionTime":200
             }
          ]
@@ -43,7 +43,7 @@
             {
                "productName":"car",
                "stageId":2,
-               "actionId":1,
+               "actionName":"fixing seats",
                "productionTime":100
             }
          ]
@@ -57,7 +57,7 @@
             {
                "productName":"car",
                "stageId":2,
-               "actionId":2,
+               "actionName":"fixing engine",
                "productionTime":100
             }
          ]
@@ -71,7 +71,7 @@
             {
                "productName":"seats",
                "stageId":1,
-               "actionId":1,
+               "actionName":"seats assembly",
                "productionTime":200
             }
          ]
@@ -85,7 +85,7 @@
                "stageId":1,
                "actions":[
                   {
-                     "actionId":1,
+                     "actionName":"main body assembly",
                      "subproducts":[
 
                      ]
@@ -96,13 +96,13 @@
                "stageId":2,
                "actions":[
                   {
-                     "actionId":1,
+                     "actionName":"fixing seats",
                      "subproducts":[
                         "seats"
                      ]
                   },
                   {
-                     "actionId":2,
+                     "actionName":"fixing engine",
                      "subproducts":[
                         "engine"
                      ]
@@ -118,7 +118,7 @@
                "stageId":1,
                "actions":[
                   {
-                     "actionId":1,
+                     "actionName":"seats assembly",
                      "subproducts":[
 
                      ]
@@ -134,7 +134,7 @@
                "stageId":1,
                "actions":[
                   {
-                     "actionId":1,
+                     "actionName":"engine assembly",
                      "subproducts":[
 
                      ]

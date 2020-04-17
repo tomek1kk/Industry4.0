@@ -1,3 +1,15 @@
+//produkty: akcje w ramach jednego stage mogą być wykonywane w różnej kolejności
+
+//maszyny: gniazdo dodane jako pole w maszynie, jedyne zastosowanie gniazd jakie wymyśliłem to takie
+//że transport w ramach tego samego soketa nie zabierałby czasu, a pomiędzy soketami zabierałby
+
+//in/outBufferCapacity wielkośc buforów maszyny, przeczytałem o tym z tej stronki o Chryslerze-Daimlerze,
+//tam podejście było inne niż u nas, ale takie bufory dodają jakiegoś realizmu (pełny buufor in - maszyna zapchana)
+//ale niesie to ze sobą problem deadlocków - więc  może jednak to olać i uznać że maszyny mają nieskończony bufor? co na to Paprzycki? (IMO deadlocki to duży problem)
+
+//opis przykładu: produkt końcowy samchód, w stage 1 tworzona jest skorupa samochodu,
+//a w stage 2 montowane fotele i montowany silnik w dowolnej kolejności
+
 {
    "$schema":"http://json-schema.org/schema#",
    "type":"object",
@@ -38,7 +50,7 @@
                      "required":[
                         "productName",
                         "stageId",
-                        "actionId",
+                        "actionName",
                         "productionTime"
                      ],
                      "properties":{
@@ -48,8 +60,8 @@
                         "stageId":{
                            "type":"integer"
                         },
-                        "actionId":{
-                           "type":"integer"
+                        "actionName":{
+                           "type":"string"
                         },
                         "productionTime":{
                            "type":"integer",
@@ -90,12 +102,12 @@
                            "items":{
                               "type":"object",
                               "required":[
-                                 "actionId",
+                                 "actionName",
                                  "subproducts"
                               ],
                               "properties":{
-                                 "actionId":{
-                                    "type":"integer"
+                                 "actionName":{
+                                    "type":"string"
                                  },
                                  "subproducts":{
                                     "type":"array",
