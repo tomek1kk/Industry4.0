@@ -3,8 +3,6 @@
       {
          "machineId":1,
          "socketId":1,
-         "inBufferCapacity":20,
-         "outBufferCapacity":10,
          "actions":[
             {
                "productName":"car",
@@ -23,8 +21,6 @@
       {
          "machineId":2,
          "socketId":1,
-         "inBufferCapacity":20,
-         "outBufferCapacity":10,
          "actions":[
             {
                "productName":"engine",
@@ -37,8 +33,6 @@
       {
          "machineId":3,
          "socketId":2,
-         "inBufferCapacity":20,
-         "outBufferCapacity":10,
          "actions":[
             {
                "productName":"car",
@@ -51,8 +45,6 @@
       {
          "machineId":4,
          "socketId":2,
-         "inBufferCapacity":20,
-         "outBufferCapacity":10,
          "actions":[
             {
                "productName":"car",
@@ -65,8 +57,6 @@
       {
          "machineId":5,
          "socketId":2,
-         "inBufferCapacity":20,
-         "outBufferCapacity":10,
          "actions":[
             {
                "productName":"seats",

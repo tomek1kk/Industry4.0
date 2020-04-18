@@ -3,9 +3,7 @@
 //maszyny: gniazdo dodane jako pole w maszynie, jedyne zastosowanie gniazd jakie wymyśliłem to takie
 //że transport w ramach tego samego soketa nie zabierałby czasu, a pomiędzy soketami zabierałby
 
-//in/outBufferCapacity wielkośc buforów maszyny, przeczytałem o tym z tej stronki o Chryslerze-Daimlerze,
-//tam podejście było inne niż u nas, ale takie bufory dodają jakiegoś realizmu (pełny buufor in - maszyna zapchana)
-//ale niesie to ze sobą problem deadlocków - więc  może jednak to olać i uznać że maszyny mają nieskończony bufor? co na to Paprzycki? (IMO deadlocki to duży problem)
+//in/outBufferCapacity wielkośc buforów maszyny, narazie robimy bez tego
 
 //opis przykładu: produkt końcowy samchód, w stage 1 tworzona jest skorupa samochodu,
 //a w stage 2 montowane fotele i montowany silnik w dowolnej kolejności
@@ -26,8 +24,6 @@
             "required":[
                "machineId",
                "socketId",
-               "inBufferCapacity",
-               "outBufferCapacity",
                "actions"
             ],
             "properties":{
@@ -35,12 +31,6 @@
                   "type":"integer"
                },
                "socketId":{
-                  "type":"integer"
-               },
-               "inBufferCapacity":{
-                  "type":"integer"
-               },
-               "outBufferCapacity":{
                   "type":"integer"
                },
                "actions":{
