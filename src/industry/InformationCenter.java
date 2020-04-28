@@ -17,7 +17,7 @@ public class InformationCenter {
     }
     public void addMachine(Machine m)
     {
-        machines.put(m.id, m);
+        machines.put(m.machineId, m);
         System.out.println("Machine added");
     }
     public void addProduct(Product p)
