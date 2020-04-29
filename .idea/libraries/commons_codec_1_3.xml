@@ -6,8 +6,15 @@
       <root url="jar://$PROJECT_DIR$/lib/jade.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/json-simple-1.1.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/org.json-chargebee-1.0.jar!/" />
+      <root url="file://$USER_HOME$/Downloads/openjfx-11.0.2_windows-x64_bin-sdk/javafx-sdk-11.0.2/lib" />
+      <root url="file://C:/Program Files (x86)/Java/javafx-sdk-11.0.2/lib" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="file://C:/Program Files (x86)/Java/javafx-sdk-11.0.2/lib" />
+    </SOURCES>
+    <jarDirectory url="file://C:/Program Files (x86)/Java/javafx-sdk-11.0.2/lib" recursive="false" />
+    <jarDirectory url="file://$USER_HOME$/Downloads/openjfx-11.0.2_windows-x64_bin-sdk/javafx-sdk-11.0.2/lib" recursive="false" />
+    <jarDirectory url="file://C:/Program Files (x86)/Java/javafx-sdk-11.0.2/lib" recursive="false" type="SOURCES" />
   </library>
 </component>
