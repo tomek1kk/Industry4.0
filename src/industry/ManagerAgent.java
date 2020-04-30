@@ -12,7 +12,6 @@ import com.google.gson.JsonParser;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
-import javafx.util.Pair;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -24,7 +23,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class ManagerAgent extends Agent {
-    private List<Pair<String, Machine>> machineAgents = new ArrayList<Pair<String, Machine>>();
+    private List<MachineReference> machineAgents = new ArrayList<MachineReference>();
 
     protected void parseMachineObject(JsonObject machine, InformationCenter ic) {
         int machineId = machine.get("machineId").getAsInt();

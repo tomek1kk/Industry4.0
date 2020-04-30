@@ -3,14 +3,13 @@ package industry;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.OneShotBehaviour;
-import javafx.util.Pair;
 
 import java.util.HashMap;
 import java.util.List;
 
 public class MachineAgent extends Agent {
     Machine machine;
-    HashMap<String, List<Pair<String, Machine>>> productMachines;
+    HashMap<String, List<MachineReference>> productMachines;
 
     @Override
     protected void setup() {
@@ -23,7 +22,7 @@ public class MachineAgent extends Agent {
                 System.out.println(getAID().getLocalName() + " started");
                 productMachines.forEach((product, machines)-> {
                     machines.forEach(m -> {
-                        System.out.println("I'm " + getAID().getLocalName() + " and I produce " + product + " Machine that can help me: " + m.getKey());
+                        System.out.println("I'm " + getAID().getLocalName() + " and I produce " + product + " Machine that can help me: " + m.name);
                     });
                 });
             }
