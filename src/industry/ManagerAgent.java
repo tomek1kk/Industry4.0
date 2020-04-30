@@ -12,7 +12,6 @@ import com.google.gson.JsonParser;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
-import javafx.util.Pair;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -24,7 +23,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class ManagerAgent extends Agent {
-    private List<Pair<String, Machine>> machineAgents = new ArrayList<Pair<String, Machine>>();
+    private List<MachineReference> machineAgents = new ArrayList<MachineReference>();
 
     protected void parseMachineObject(JsonObject machine, InformationCenter ic) {
         int machineId = machine.get("machineId").getAsInt();
@@ -70,24 +69,43 @@ public class ManagerAgent extends Agent {
     }
 
     protected void addNewMachineAgent(Machine machine, Collection<Machine> machines, HashMap<String, Product> products) {
-//        ContainerController cc = getContainerController();
-//        AgentController ac = null;
-//        try {
-//            String agentName = "Machine" + machine.machineId;
-//            machineAgents.add(new Pair<>(agentName, machine));
-//            HashMap<String, List<Pair<String, Machine>>> productsSubmachines = new HashMap<String, List<Pair<String, Machine>>>();
-//            machine.actions.forEach((name, product)-> {
-//                List<String> blockedBy = products.get(name).blockedBy;
-//                productsSubmachines.put(name, machines.stream().filter(m -> containsAny(m.products, blockedBy)).map(m-> new Pair<>("Machine" + m.id, m)).collect(Collectors.toList()));
-//            });
-//            Object[] args = new Object[1];
-//            args[0] = new MachineAgentArguments(machine, productsSubmachines);
-//            ac = cc.createNewAgent(agentName, "industry.MachineAgent", args);
-//
-//            ac.start();
-//        } catch (StaleProxyException e) {
-//            e.printStackTrace();
-//        }
+        ContainerController cc = getContainerController();
+        AgentController ac = null;
+        try {
+            String agentName = "Machine" + machine.machineId;
+            machineAgents.add(new MachineReference(agentName, machine));
+            HashMap<String, List<MachineReference>> productsSubmachines = new HashMap<String, List<MachineReference>>();
+            HashMap<String, List<MachineReference>> sameProdMachines = new HashMap<String, List<MachineReference>>();
+
+            machine.actions.forEach((name, action)-> {
+                // lista podproduktow dla danej akcji
+                List<ProductAction> productAction = products.get(action.productName).stages.get(action.stageId)
+                      .stream().filter(a -> a.actionName.equals(action.actionName)).collect(Collectors.toList());
+                List<String> subproducts = new ArrayList<>();
+                if (productAction.size() > 0)
+                    subproducts = productAction.get(0).subproducts;
+                // dla kazdego podproduktu generujemy liste maszyn go produkujacych
+                subproducts.forEach(product -> {
+                    int maxStage = Collections.max(products.get(product).stages.keySet());
+                    productsSubmachines.put(product, machines.stream().filter(m -> m.actions.values().stream()
+                            .anyMatch(a -> a.productName.equals(product) && a.stageId == maxStage))
+                            .map(m -> new MachineReference(m)).collect(Collectors.toList()));
+                });
+                // dla kazdej akcji ustalamy liste maszyn ktore dzialaja na tym samym produkcie i tym samym lub o 1 nizszym stagu
+                List<MachineReference> sameProductMachines = machines.stream().filter(m -> m.actions.values().stream()
+                        .anyMatch(a -> a.productName.equals(action.productName) && !a.actionName.equals(action.actionName)
+                                && (a.stageId == action.stageId || a.stageId == action.stageId - 1)))
+                        .map(m -> new MachineReference(m)).collect(Collectors.toList());
+                sameProdMachines.put(action.actionName, sameProductMachines);
+            });
+            Object[] args = new Object[1];
+            args[0] = new MachineAgentArguments(machine, productsSubmachines, sameProdMachines);
+            ac = cc.createNewAgent(agentName, "industry.MachineAgent", args);
+
+            ac.start();
+        } catch (StaleProxyException e) {
+            e.printStackTrace();
+        }
     }
 
     private boolean containsAny(HashMap<String, Integer> map, List<String> list) {
