@@ -75,30 +75,31 @@ public class ManagerAgent extends Agent {
             String agentName = "Machine" + machine.machineId;
             machineAgents.add(new MachineReference(agentName, machine));
             HashMap<String, List<MachineReference>> productsSubmachines = new HashMap<String, List<MachineReference>>();
-            HashMap<String, List<MachineReference>> sameStageMachines = new HashMap<String, List<MachineReference>>();
+            HashMap<String, List<MachineReference>> sameProdMachines = new HashMap<String, List<MachineReference>>();
 
             machine.actions.forEach((name, action)-> {
                 // lista podproduktow dla danej akcji
-                List<String> subproducts = products.get(action.productName).stages.get(action.stageId).stream()
-                        .filter(a -> a.actionName == action.actionName).findAny().orElse(null).subproducts;
+                List<ProductAction> productAction = products.get(action.productName).stages.get(action.stageId)
+                      .stream().filter(a -> a.actionName.equals(action.actionName)).collect(Collectors.toList());
+                List<String> subproducts = new ArrayList<>();
+                if (productAction.size() > 0)
+                    subproducts = productAction.get(0).subproducts;
                 // dla kazdego podproduktu generujemy liste maszyn go produkujacych
                 subproducts.forEach(product -> {
                     int maxStage = Collections.max(products.get(product).stages.keySet());
                     productsSubmachines.put(product, machines.stream().filter(m -> m.actions.values().stream()
-                            .anyMatch(a -> a.productName == product && a.stageId == maxStage))
+                            .anyMatch(a -> a.productName.equals(product) && a.stageId == maxStage))
                             .map(m -> new MachineReference(m)).collect(Collectors.toList()));
                 });
-                // dla kazdej akcji ustalamy liste maszyn ktore dzialaja na tym samym produkcie
+                // dla kazdej akcji ustalamy liste maszyn ktore dzialaja na tym samym produkcie i tym samym lub o 1 nizszym stagu
                 List<MachineReference> sameProductMachines = machines.stream().filter(m -> m.actions.values().stream()
-                        .anyMatch(a -> a.productName == action.productName))
+                        .anyMatch(a -> a.productName.equals(action.productName) && !a.actionName.equals(action.actionName)
+                                && (a.stageId == action.stageId || a.stageId == action.stageId - 1)))
                         .map(m -> new MachineReference(m)).collect(Collectors.toList());
-                sameStageMachines.put(action.actionName, sameProductMachines);
-
-                //List<String> blockedBy = products.get(name).blockedBy;
-                //productsSubmachines.put(name, machines.stream().filter(m -> containsAny(m.products, blockedBy)).map(m-> new Pair<>("Machine" + m.id, m)).collect(Collectors.toList()));
+                sameProdMachines.put(action.actionName, sameProductMachines);
             });
             Object[] args = new Object[1];
-            args[0] = new MachineAgentArguments(machine, productsSubmachines);
+            args[0] = new MachineAgentArguments(machine, productsSubmachines, sameProdMachines);
             ac = cc.createNewAgent(agentName, "industry.MachineAgent", args);
 
             ac.start();
