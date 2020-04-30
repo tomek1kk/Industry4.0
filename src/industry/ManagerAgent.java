@@ -69,24 +69,42 @@ public class ManagerAgent extends Agent {
     }
 
     protected void addNewMachineAgent(Machine machine, Collection<Machine> machines, HashMap<String, Product> products) {
-//        ContainerController cc = getContainerController();
-//        AgentController ac = null;
-//        try {
-//            String agentName = "Machine" + machine.machineId;
-//            machineAgents.add(new Pair<>(agentName, machine));
-//            HashMap<String, List<Pair<String, Machine>>> productsSubmachines = new HashMap<String, List<Pair<String, Machine>>>();
-//            machine.actions.forEach((name, product)-> {
-//                List<String> blockedBy = products.get(name).blockedBy;
-//                productsSubmachines.put(name, machines.stream().filter(m -> containsAny(m.products, blockedBy)).map(m-> new Pair<>("Machine" + m.id, m)).collect(Collectors.toList()));
-//            });
-//            Object[] args = new Object[1];
-//            args[0] = new MachineAgentArguments(machine, productsSubmachines);
-//            ac = cc.createNewAgent(agentName, "industry.MachineAgent", args);
-//
-//            ac.start();
-//        } catch (StaleProxyException e) {
-//            e.printStackTrace();
-//        }
+        ContainerController cc = getContainerController();
+        AgentController ac = null;
+        try {
+            String agentName = "Machine" + machine.machineId;
+            machineAgents.add(new MachineReference(agentName, machine));
+            HashMap<String, List<MachineReference>> productsSubmachines = new HashMap<String, List<MachineReference>>();
+            HashMap<String, List<MachineReference>> sameStageMachines = new HashMap<String, List<MachineReference>>();
+
+            machine.actions.forEach((name, action)-> {
+                // lista podproduktow dla danej akcji
+                List<String> subproducts = products.get(action.productName).stages.get(action.stageId).stream()
+                        .filter(a -> a.actionName == action.actionName).findAny().orElse(null).subproducts;
+                // dla kazdego podproduktu generujemy liste maszyn go produkujacych
+                subproducts.forEach(product -> {
+                    int maxStage = Collections.max(products.get(product).stages.keySet());
+                    productsSubmachines.put(product, machines.stream().filter(m -> m.actions.values().stream()
+                            .anyMatch(a -> a.productName == product && a.stageId == maxStage))
+                            .map(m -> new MachineReference(m)).collect(Collectors.toList()));
+                });
+                // dla kazdej akcji ustalamy liste maszyn ktore dzialaja na tym samym produkcie
+                List<MachineReference> sameProductMachines = machines.stream().filter(m -> m.actions.values().stream()
+                        .anyMatch(a -> a.productName == action.productName))
+                        .map(m -> new MachineReference(m)).collect(Collectors.toList());
+                sameStageMachines.put(action.actionName, sameProductMachines);
+
+                //List<String> blockedBy = products.get(name).blockedBy;
+                //productsSubmachines.put(name, machines.stream().filter(m -> containsAny(m.products, blockedBy)).map(m-> new Pair<>("Machine" + m.id, m)).collect(Collectors.toList()));
+            });
+            Object[] args = new Object[1];
+            args[0] = new MachineAgentArguments(machine, productsSubmachines);
+            ac = cc.createNewAgent(agentName, "industry.MachineAgent", args);
+
+            ac.start();
+        } catch (StaleProxyException e) {
+            e.printStackTrace();
+        }
     }
 
     private boolean containsAny(HashMap<String, Integer> map, List<String> list) {
