@@ -28,9 +28,9 @@ public class ManagerAgent extends Agent {
     protected void parseMachineObject(JsonObject machine, InformationCenter ic) {
         int machineId = machine.get("machineId").getAsInt();
         int socketId = machine.get("socketId").getAsInt();
-        HashMap<String, MachineAction> actions = new HashMap<String, MachineAction>();
+        List<MachineAction> actions = new ArrayList<MachineAction>();
         JsonArray actionsJson = machine.get("actions").getAsJsonArray();
-        actionsJson.forEach(p-> actions.put(p.getAsJsonObject().get("productName").getAsString(), new MachineAction(
+        actionsJson.forEach(p-> actions.add(new MachineAction(
                 p.getAsJsonObject().get("productName").getAsString(),
                 p.getAsJsonObject().get("stageId").getAsInt(),
                 p.getAsJsonObject().get("actionName").getAsString(),
@@ -76,8 +76,9 @@ public class ManagerAgent extends Agent {
             machineAgents.add(new MachineReference(agentName, machine));
             HashMap<String, List<MachineReference>> productsSubmachines = new HashMap<String, List<MachineReference>>();
             HashMap<String, List<MachineReference>> sameProdMachines = new HashMap<String, List<MachineReference>>();
+            HashMap<String, Product> productsDefinitions = new HashMap<>();
 
-            machine.actions.forEach((name, action)-> {
+            machine.actions.forEach((action)-> {
                 // lista podproduktow dla danej akcji
                 List<ProductAction> productAction = products.get(action.productName).stages.get(action.stageId)
                       .stream().filter(a -> a.actionName.equals(action.actionName)).collect(Collectors.toList());
@@ -87,19 +88,23 @@ public class ManagerAgent extends Agent {
                 // dla kazdego podproduktu generujemy liste maszyn go produkujacych
                 subproducts.forEach(product -> {
                     int maxStage = Collections.max(products.get(product).stages.keySet());
-                    productsSubmachines.put(product, machines.stream().filter(m -> m.actions.values().stream()
+                    productsSubmachines.put(product, machines.stream().filter(m -> m.actions.stream()
                             .anyMatch(a -> a.productName.equals(product) && a.stageId == maxStage))
                             .map(m -> new MachineReference(m)).collect(Collectors.toList()));
                 });
                 // dla kazdej akcji ustalamy liste maszyn ktore dzialaja na tym samym produkcie i tym samym lub o 1 nizszym stagu
-                List<MachineReference> sameProductMachines = machines.stream().filter(m -> m.actions.values().stream()
+                List<MachineReference> sameProductMachines = machines.stream().filter(m -> m.actions.stream()
                         .anyMatch(a -> a.productName.equals(action.productName) && !a.actionName.equals(action.actionName)
                                 && (a.stageId == action.stageId || a.stageId == action.stageId - 1)))
                         .map(m -> new MachineReference(m)).collect(Collectors.toList());
                 sameProdMachines.put(action.actionName, sameProductMachines);
+                //wybieramy definicje produktów, w produkcji których bierze udział maszyna
+                if(!productsDefinitions.containsKey(action.productName)){
+                    productsDefinitions.put(action.productName, products.get(action.productName));
+                }
             });
             Object[] args = new Object[1];
-            args[0] = new MachineAgentArguments(machine, productsSubmachines, sameProdMachines);
+            args[0] = new MachineAgentArguments(machine, productsSubmachines, sameProdMachines, productsDefinitions);
             ac = cc.createNewAgent(agentName, "industry.MachineAgent", args);
 
             ac.start();

@@ -10,6 +10,12 @@
                "actionName":"main body assembly",
                "productionTime":60
             },
+			{
+               "productName":"car",
+               "stageId":1,
+               "actionName":"welding",
+               "productionTime":60
+            },
             {
                "productName":"engine",
                "stageId":1,
