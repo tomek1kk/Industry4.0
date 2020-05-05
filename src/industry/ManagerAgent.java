@@ -106,7 +106,6 @@ public class ManagerAgent extends Agent {
             Object[] args = new Object[1];
             args[0] = new MachineAgentArguments(machine, productsSubmachines, sameProdMachines, productsDefinitions);
             ac = cc.createNewAgent(agentName, "industry.MachineAgent", args);
-
             ac.start();
         } catch (StaleProxyException e) {
             e.printStackTrace();
@@ -121,12 +120,23 @@ public class ManagerAgent extends Agent {
         return false;
     }
 
+    private void RunSimulation(InformationCenter ic){
+        ContainerController cc = getContainerController();
+        try {
+            Object[] args = new Object[1];
+            args[0] = ic;
+            AgentController ac = cc.createNewAgent("SimulationAgent", "industry.SimulationAgent", args);
+            ac.start();
+        } catch (StaleProxyException e) {
+            e.printStackTrace();
+        }
+    }
+
     protected void setup() {
         Behaviour readConfiguration = new OneShotBehaviour() {
             @Override
             public void action() {
                 InformationCenter ic = new InformationCenter();
-                System.out.println("dupa");
                 Gson gson = new Gson();
                 Reader reader = null;
                 JsonParser parser = new JsonParser();
@@ -147,8 +157,10 @@ public class ManagerAgent extends Agent {
                         ic.machines.forEach((id, machine)-> {
                             addNewMachineAgent(machine, ic.machines.values(), ic.products);
                         });
-                        reader.close();
 
+                        RunSimulation(ic);
+
+                        reader.close();
                     }
                 catch (Exception e) {
                         e.printStackTrace();

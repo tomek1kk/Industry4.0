@@ -67,7 +67,7 @@ public class MachineAgent extends Agent {
 
             @Override
             protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose, ACLMessage accept) {
-                Cfp3 messageContent = parser.fromJson(accept.getContent(), Cfp3.class);
+                Cfp1 messageContent = parser.fromJson(cfp.getContent(), Cfp1.class);
                 //TODO: umieszczenie w kolejce i produkcja
                 return new ACLMessage(ACLMessage.INFORM);
             }
