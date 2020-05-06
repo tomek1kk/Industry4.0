@@ -36,15 +36,7 @@ public class Cfp1 {
         return productId;
     }
 
-    public Integer getRequestedActionStage() {
-        return requestedActionStage;
-    }
-
-    public String getRequestedActionName() {
-        return requestedActionName;
-    }
-
-    public Map<String, List<String>> getBookedActions() {
+    public Map<Integer, List<String>> getBookedActions() {
         return bookedActions;
     }
 }
