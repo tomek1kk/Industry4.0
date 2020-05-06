@@ -13,3 +13,6 @@
   * Different machines within GoMs can experience problems that will force them out of service, or require them to be (graciously) taken out of service – for limited (not necessarily known in advance) time
 * In Daimler-Chrysler case it was shown that placing an agent within each GoM, and adding management agents to the ecosystem, can result in productivity improvement
 * Aim of the project is to develop an agent-based “simulator” that will allow modeling and studying such ecosystem
+
+
+link do schematu znajomości agentów: https://drive.google.com/file/d/1s-KRB-jUtB8HHYWPJhxboZYnUP75Y7pU/view?usp=sharing
