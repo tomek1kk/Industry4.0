@@ -38,6 +38,7 @@ public class SimulationAgent extends Agent {
                         reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
                         acceptances.addElement(reply);
                         Cfp2 proposeMessage = parser.fromJson(msg.getContent(), Cfp2.class);
+                        System.out.println("Got response: " + proposeMessage.getProductionTime());
                         if(CalculateMetric(proposeMessage) < metric){
                             bestProposeReply = reply;
                             metric = CalculateMetric(proposeMessage);
@@ -75,7 +76,7 @@ public class SimulationAgent extends Agent {
     protected void setup() {
         ic = (InformationCenter) (getArguments()[0]);
 
-        Behaviour RequestsBehaviour = new TickerBehaviour(this, 1) {
+        Behaviour RequestsBehaviour = new TickerBehaviour(this, 1000) {
             @Override
             protected void onTick() {
                 Simulation currentSimulation = ic.simulations.get(step);
@@ -85,7 +86,7 @@ public class SimulationAgent extends Agent {
                     final DemandedProduct product = currentSimulation.demandedProducts.get(j);
                     ic.products.get(product.name).stages.get(lastStageId).forEach(action ->{
                         Cfp1 requestContent = new Cfp1(product.name, action.actionName, lastStageId, product.priority,
-                                GenerateProductId(), new HashMap<Integer, List<String>>());
+                                GenerateProductId(), new HashMap<Integer, List<String>>(), getLocalName());
                         ic.machines.values().forEach(machine -> {
                             machine.actions.forEach(machineAction -> {
                                 if(machineAction.productName.equals(product.name)
@@ -103,7 +104,6 @@ public class SimulationAgent extends Agent {
                     for(int i = 0; i < product.amount; i++){
                         addBehaviour(Cfp1Requester(messageRequests.get(0), messageRequests));
                     }
-                    messageRequests = new Vector<ACLMessage>();
                 };
                 step++;
                 if(ic.simulations.size() > step){
