@@ -1,6 +1,7 @@
 package industry;
 
 import com.google.gson.Gson;
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.OneShotBehaviour;
@@ -10,6 +11,8 @@ import jade.proto.ContractNetInitiator;
 import jade.proto.ContractNetResponder;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static jade.lang.acl.MessageTemplate.and;
 
@@ -56,11 +59,55 @@ public class MachineAgent extends Agent {
         Behaviour Cfp1Responder = new ContractNetResponder(this, MessageTemplate.MatchProtocol("cfp1")) { //wykorzystanie pola protocol do filtrowania wiadomości
             @Override
             protected ACLMessage handleCfp(ACLMessage m) {
+
                 Cfp1 messageContent = parser.fromJson(m.getContent(), Cfp1.class);
-                if(FindAction(messageContent) == null) {
+                System.out.println(machine.machineId + " got request: " + messageContent.GetActionName() + "from " + messageContent.getRequestingAgent());
+
+                MachineAction requestedAction = FindAction(messageContent);
+                if(requestedAction == null) {
                     return new ACLMessage(ACLMessage.REFUSE);
                 }
-                Cfp2 responseContent = new Cfp2(productionQueue.size(), FindAction(messageContent).productionTime, null, 1);
+
+                InformationCenter ic = InformationCenter.getInstance();
+                Product requestedProduct = ic.products.get(requestedAction.productName);
+                Map<Integer, List<String>> bookedActions = messageContent.getBookedActions();
+                ProductAction action = requestedProduct.stages.get(requestedAction.stageId)
+                        .stream().filter(a -> a.actionName.equals(requestedAction.actionName))
+                        .findAny().get();
+                if (bookedActions.get(messageContent.GetStageId()) != null) {
+                    bookedActions.get(messageContent.GetStageId()).add(action.actionName);
+                }
+                else
+                    bookedActions.put(messageContent.GetStageId(), new ArrayList<String>() { {add(action.actionName);}});
+                List<String> subproducts = new ArrayList<String>(action.subproducts);
+                subproducts.forEach(p -> {
+                    final Product product = ic.products.get(p);
+                    subproductMachines.get(p).forEach(machine -> {
+                        int stageId = Collections.max(product.stages.keySet());
+                        product.stages.get(stageId).forEach(a -> {
+                            Cfp1 request = new Cfp1(p, a.actionName, stageId, messageContent.getPriority(),
+                                    messageContent.getProductId(), bookedActions, getLocalName());
+                            sendRequest(machine.name, request);
+                        });
+
+                    });
+                });
+
+                requestedProduct.stages.get(messageContent.GetStageId()).stream().filter(a ->
+                    bookedActions.get(messageContent.GetStageId()).contains(a.actionName) == false
+                ).forEach(productAction -> {
+                    Cfp1 request = new Cfp1(requestedProduct.name, productAction.actionName, messageContent.GetStageId(),
+                            messageContent.getPriority(),
+                            messageContent.getProductId(), bookedActions, getLocalName());
+                    if (sameProductMachines.containsKey(requestedProduct.name)) {
+                        sameProductMachines.get(requestedProduct.name).forEach(machine -> {
+                            if (machine.machine.actions.stream().map(a -> a.actionName).collect(Collectors.toList()).contains(productAction.actionName))
+                                sendRequest(machine.name, request);
+                        });
+                    }
+                });
+
+                Cfp2 responseContent = new Cfp2(productionQueue.size(), requestedAction.productionTime, null, 1);
                 ACLMessage response = new ACLMessage(ACLMessage.PROPOSE);
                 response.setContent(parser.toJson(responseContent));
                 return response;
@@ -74,6 +121,14 @@ public class MachineAgent extends Agent {
             }
         };
         addBehaviour(Cfp1Responder);
+    }
+
+    private void sendRequest(String machine, Cfp1 request) {
+        ACLMessage msg = new ACLMessage(ACLMessage.CFP);
+        msg.addReceiver(new AID(machine, AID.ISLOCALNAME));
+        msg.setContent(parser.toJson(request));
+        msg.setProtocol("cfp1");
+        send(msg);
     }
 
     @Override

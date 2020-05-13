@@ -9,6 +9,14 @@ public class InformationCenter {
     public HashMap<String, Product> products;
     public ArrayList<Simulation> simulations;
 
+    private static InformationCenter instance;
+
+    public static InformationCenter getInstance() {
+        if (instance == null)
+            instance = new InformationCenter();
+        return instance;
+    }
+
     public InformationCenter()
     {
         machines = new HashMap<Integer, Machine>();

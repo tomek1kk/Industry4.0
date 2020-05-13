@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 public class ManagerAgent extends Agent {
     private List<MachineReference> machineAgents = new ArrayList<MachineReference>();
+    private InformationCenter ic;
 
     protected void parseMachineObject(JsonObject machine, InformationCenter ic) {
         int machineId = machine.get("machineId").getAsInt();
@@ -120,11 +121,11 @@ public class ManagerAgent extends Agent {
         return false;
     }
 
-    private void RunSimulation(InformationCenter ic){
+    private void RunSimulation(){
         ContainerController cc = getContainerController();
         try {
             Object[] args = new Object[1];
-            args[0] = ic;
+            args[0] = InformationCenter.getInstance();
             AgentController ac = cc.createNewAgent("SimulationAgent", "industry.SimulationAgent", args);
             ac.start();
         } catch (StaleProxyException e) {
@@ -136,7 +137,6 @@ public class ManagerAgent extends Agent {
         Behaviour readConfiguration = new OneShotBehaviour() {
             @Override
             public void action() {
-                InformationCenter ic = new InformationCenter();
                 Gson gson = new Gson();
                 Reader reader = null;
                 JsonParser parser = new JsonParser();
@@ -154,12 +154,6 @@ public class ManagerAgent extends Agent {
                         JsonArray simulations = jsonObject.get("simulation").getAsJsonArray();
                         simulations.forEach(s -> parseSimulationObject(s.getAsJsonObject(), ic));
 
-                        ic.machines.forEach((id, machine)-> {
-                            addNewMachineAgent(machine, ic.machines.values(), ic.products);
-                        });
-
-                        RunSimulation(ic);
-
                         reader.close();
                     }
                 catch (Exception e) {
@@ -167,7 +161,27 @@ public class ManagerAgent extends Agent {
                     }
             }
         };
+        Behaviour generateMachines = new WakerBehaviour(this, 2000) {
+            @Override
+            protected void onWake() {
+                System.out.println("Initializing machines...");
+                ic.machines.forEach((id, machine)-> {
+                    addNewMachineAgent(machine, ic.machines.values(), ic.products);
+                });
+            }
+        };
+        Behaviour startSimulation = new WakerBehaviour(this, 4000) {
+            @Override
+            protected void onWake() {
+                System.out.println("Starting simulation...");
+                RunSimulation();
+            }
+        };
+        ic = InformationCenter.getInstance();
         addBehaviour(readConfiguration);
+        addBehaviour(generateMachines);
+        addBehaviour(startSimulation);
+
     }
 
     @Override
