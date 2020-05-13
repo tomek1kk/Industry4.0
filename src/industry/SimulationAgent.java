@@ -18,6 +18,7 @@ public class SimulationAgent extends Agent {
     Integer lastGenerated = -1;
     final Integer sizeOfGenerator = 99999;
     BitSet generatorSet = new BitSet(sizeOfGenerator);    //all initially false
+    Vector<ACLMessage> messageRequests = new Vector<ACLMessage>();
 
     private Behaviour Cfp1Requester (ACLMessage messageRequest, Vector<ACLMessage> messageRequests){
         return new ContractNetInitiator(this, messageRequest) {
@@ -78,15 +79,16 @@ public class SimulationAgent extends Agent {
             @Override
             protected void onTick() {
                 Simulation currentSimulation = ic.simulations.get(step);
-                Vector<ACLMessage> messageRequests = new Vector<ACLMessage>();
+                messageRequests = new Vector<ACLMessage>();
                 for(int j = 0; j < currentSimulation.demandedProducts.size(); j++){
                     Integer lastStageId = Collections.max(ic.products.get(currentSimulation.demandedProducts.get(j).name).stages.keySet());
-                    ic.products.get(currentSimulation.demandedProducts.get(j).name).stages.get(lastStageId).forEach(action ->{
-                        Cfp1 requestContent = new Cfp1(currentSimulation.demandedProducts.get(j).name, action.actionName, lastStageId, currentSimulation.demandedProducts.get(j).priority,
+                    final DemandedProduct product = currentSimulation.demandedProducts.get(j);
+                    ic.products.get(product.name).stages.get(lastStageId).forEach(action ->{
+                        Cfp1 requestContent = new Cfp1(product.name, action.actionName, lastStageId, product.priority,
                                 GenerateProductId(), new HashMap<Integer, List<String>>());
                         ic.machines.values().forEach(machine -> {
                             machine.actions.forEach(machineAction -> {
-                                if(machineAction.productName.equals(currentSimulation.demandedProducts.get(j).name)
+                                if(machineAction.productName.equals(product.name)
                                         && machineAction.stageId == lastStageId
                                         && machineAction.actionName.equals(action.actionName)){
                                     ACLMessage msg = new ACLMessage(ACLMessage.CFP);
@@ -98,7 +100,7 @@ public class SimulationAgent extends Agent {
                             });
                         });
                     });
-                    for(int i = 0; i < currentSimulation.demandedProducts.get(j).amount; i++){
+                    for(int i = 0; i < product.amount; i++){
                         addBehaviour(Cfp1Requester(messageRequests.get(0), messageRequests));
                     }
                     messageRequests = new Vector<ACLMessage>();
