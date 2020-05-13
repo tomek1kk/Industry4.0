@@ -35,6 +35,7 @@ public class MachineAgent extends Agent {
             public void action() {
                 System.out.println(getAID().getLocalName() + " started");
                 System.out.println("My actions:");
+                System.out.println("My AID: " + getAID().toString());
                 machine.actions.forEach((action) -> {
                     System.out.println("Product: " + action.productName + ", action: " + action.actionName);
                 });

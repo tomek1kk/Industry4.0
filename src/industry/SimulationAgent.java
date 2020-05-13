@@ -8,6 +8,7 @@ import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.proto.ContractNetInitiator;
 
+import java.nio.file.attribute.AclEntry;
 import java.util.*;
 
 public class SimulationAgent extends Agent {
@@ -78,32 +79,35 @@ public class SimulationAgent extends Agent {
             protected void onTick() {
                 Simulation currentSimulation = ic.simulations.get(step);
                 Vector<ACLMessage> messageRequests = new Vector<ACLMessage>();
-                currentSimulation.demandedProducts.forEach(product -> {
-                    Integer lastStageId = Collections.max(ic.products.get(product.name).stages.keySet());
-                    ic.products.get(product.name).stages.get(lastStageId).forEach(action ->{
-                        Cfp1 requestContent = new Cfp1(product.name, action.actionName, lastStageId, product.priority,
+                for(int j = 0; j < currentSimulation.demandedProducts.size(); j++){
+                    Integer lastStageId = Collections.max(ic.products.get(currentSimulation.demandedProducts.get(j).name).stages.keySet());
+                    ic.products.get(currentSimulation.demandedProducts.get(j).name).stages.get(lastStageId).forEach(action ->{
+                        Cfp1 requestContent = new Cfp1(currentSimulation.demandedProducts.get(j).name, action.actionName, lastStageId, currentSimulation.demandedProducts.get(j).priority,
                                 GenerateProductId(), new HashMap<Integer, List<String>>());
                         ic.machines.values().forEach(machine -> {
                             machine.actions.forEach(machineAction -> {
-                                if(machineAction.productName.equals(product.name)
+                                if(machineAction.productName.equals(currentSimulation.demandedProducts.get(j).name)
                                         && machineAction.stageId == lastStageId
                                         && machineAction.actionName.equals(action.actionName)){
                                     ACLMessage msg = new ACLMessage(ACLMessage.CFP);
                                     msg.addReceiver(new AID("Machine" + Integer.toString(machine.machineId), AID.ISLOCALNAME));
                                     msg.setContent(parser.toJson(requestContent));
+                                    msg.setProtocol("cfp1");
                                     messageRequests.add(msg);
                                 }
                             });
                         });
                     });
-                    for(int i = 0; i < product.amount; i++){
+                    for(int i = 0; i < currentSimulation.demandedProducts.get(j).amount; i++){
                         addBehaviour(Cfp1Requester(messageRequests.get(0), messageRequests));
                     }
-                    messageRequests.clear();
-                });
+                    messageRequests = new Vector<ACLMessage>();
+                };
                 step++;
                 if(ic.simulations.size() > step){
                     reset(currentSimulation.duration);
+                } else {
+                    stop();
                 }
             }
         };
