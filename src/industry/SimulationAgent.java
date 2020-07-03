@@ -4,73 +4,38 @@ import com.google.gson.Gson;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.SimpleBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 import jade.proto.ContractNetInitiator;
+//import org.graalvm.compiler.nodes.memory.PluginFactory_MemoryAnchorNode;
 
 import java.nio.file.attribute.AclEntry;
 import java.util.*;
+
+//System.currentTimeMillis()
+
 
 public class SimulationAgent extends Agent {
     Gson parser = new Gson();
     InformationCenter ic;
     Integer step = 0;
-    Integer lastGenerated = -1;
-    final Integer sizeOfGenerator = 99999;
-    BitSet generatorSet = new BitSet(sizeOfGenerator);    //all initially false
-    Vector<ACLMessage> messageRequests = new Vector<ACLMessage>();
+    Integer lastGenerated = 0;
+    Integer lastGeneratedProductId = 0;
+    Map<Integer, List<PlanElement>> PlanMap = new HashMap<Integer, List<PlanElement>>();
+    List<DoneProduct> DoneProducts = new LinkedList<DoneProduct>();
 
-    private Behaviour Cfp1Requester (ACLMessage messageRequest, Vector<ACLMessage> messageRequests){
-        return new ContractNetInitiator(this, messageRequest) {
-            @Override
-            protected java.util.Vector prepareCfps(ACLMessage cfp){
-                return messageRequests;
-            }
-            @Override
-            protected void handleAllResponses(Vector responses, Vector acceptances) {
-                Enumeration e = responses.elements();
-                ACLMessage bestProposeReply = null;
-                Integer metric = Integer.MAX_VALUE;
-                while (e.hasMoreElements()) {
-                    ACLMessage msg = (ACLMessage) e.nextElement();
-                    if (msg.getPerformative() == ACLMessage.PROPOSE) {
-                        ACLMessage reply = msg.createReply();
-                        reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
-                        acceptances.addElement(reply);
-                        Cfp2 proposeMessage = parser.fromJson(msg.getContent(), Cfp2.class);
-                        System.out.println("Got response: " + proposeMessage.getProductionTime());
-                        if(CalculateMetric(proposeMessage) < metric){
-                            bestProposeReply = reply;
-                            metric = CalculateMetric(proposeMessage);
-                        }
-                    }
-                }
-                if (acceptances.size() > 0) {
-                    bestProposeReply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-                } else {
-                    System.out.println("No machine that make this product");
-                }
-            }
-        };
-    }
-
-    private Integer CalculateMetric(Cfp2 proposeMessage){
-        return proposeMessage.getAmountInQueue() * proposeMessage.getProductionTime(); //prosta heurystyka
-    }
-
-    private String GenerateProductId(){
-        for(int i = 1; i < sizeOfGenerator; i++){
-            if(generatorSet.get((lastGenerated + i) % sizeOfGenerator) == false){
-                lastGenerated += i;
-                generatorSet.set(lastGenerated);
-                String res = Integer.toString(lastGenerated);
-                while(res.length() < 5){
-                    res = "0" + res;
-                }
-                return "00" + res;
-            }
+    private String GenerateId(){
+        ++lastGenerated;
+        String id = Integer.toString(lastGenerated);
+        for (int i = id.length(); i < 9; i++){
+            id = "0" + id;
         }
-        return "noFreeIdError";
+        return "00" + id;
+    }
+    private Integer GenerateProductId(){
+        return ++lastGeneratedProductId;
     }
 
     protected void setup() {
@@ -80,29 +45,33 @@ public class SimulationAgent extends Agent {
             @Override
             protected void onTick() {
                 Simulation currentSimulation = ic.simulations.get(step);
-                messageRequests = new Vector<ACLMessage>();
                 for(int j = 0; j < currentSimulation.demandedProducts.size(); j++){
                     Integer lastStageId = Collections.max(ic.products.get(currentSimulation.demandedProducts.get(j).name).stages.keySet());
                     final DemandedProduct product = currentSimulation.demandedProducts.get(j);
-                    ic.products.get(product.name).stages.get(lastStageId).forEach(action ->{
-                        Cfp1 requestContent = new Cfp1(product.name, action.actionName, lastStageId, product.priority,
-                                GenerateProductId(), new HashMap<Integer, List<String>>(), getLocalName());
-                        ic.machines.values().forEach(machine -> {
-                            machine.actions.forEach(machineAction -> {
-                                if(machineAction.productName.equals(product.name)
-                                        && machineAction.stageId == lastStageId
-                                        && machineAction.actionName.equals(action.actionName)){
-                                    ACLMessage msg = new ACLMessage(ACLMessage.CFP);
-                                    msg.addReceiver(new AID("Machine" + Integer.toString(machine.machineId), AID.ISLOCALNAME));
-                                    msg.setContent(parser.toJson(requestContent));
-                                    msg.setProtocol("cfp1");
-                                    messageRequests.add(msg);
-                                }
+                    for(int i = 0; i < product.amount; i++){
+                        Integer productId = GenerateProductId();
+                        LinkedList<PlanElement> PlanList = new LinkedList<PlanElement>();
+                        ic.products.get(product.name).stages.get(lastStageId).forEach(action ->{
+                            PlanMessage requestContent = new PlanMessage(product.name, action.actionName, lastStageId, product.priority,
+                                    new HashMap<Integer, List<String>>(), getLocalName(), "dummyID");
+                            ic.machines.values().forEach(machine -> {
+                                machine.actions.forEach(machineAction -> {
+                                    if(machineAction.productName.equals(product.name)
+                                            && machineAction.stageId == lastStageId
+                                            && machineAction.actionName.equals(action.actionName)){
+                                        ACLMessage msg = new ACLMessage();
+                                        AID receiver = new AID("Machine" + Integer.toString(machine.machineId), AID.ISLOCALNAME);
+                                        AID UpperSender = new AID("dummySender", AID.ISLOCALNAME);
+                                        msg.addReceiver(receiver);
+                                        requestContent.setId(GenerateId());
+                                        msg.setProtocol("plan");
+                                        PlanList.add(new PlanElement(new PlanMessage(requestContent), msg, receiver, UpperSender, null));
+                                    }
+                                });
                             });
                         });
-                    });
-                    for(int i = 0; i < product.amount; i++){
-                        addBehaviour(Cfp1Requester(messageRequests.get(0), messageRequests));
+                        PlanMap.put(productId, PlanList);
+                        addBehaviour(PlanBehaviour(productId));
                     }
                 };
                 step++;
@@ -117,5 +86,103 @@ public class SimulationAgent extends Agent {
     }
     protected void takeDown() {
         super.takeDown();
+    }
+    SimpleBehaviour PlanBehaviour(Integer productId){
+        return new SimpleBehaviour() {
+            boolean finished = false;
+            @Override
+            public void action() {
+                PlanMap.get(productId).forEach(planElement ->{
+                        addBehaviour(WaitForOffer(productId, planElement._messageContent.getId()));
+                        planElement._aclMessage.setContent(parser.toJson(planElement._messageContent));
+                        send(planElement._aclMessage);
+                });
+                finished = true;
+            }
+            @Override
+            public boolean done() {
+                return finished;
+            }
+        };
+    }
+    SimpleBehaviour WaitForOffer(Integer productId, String id){
+        return new SimpleBehaviour() {
+            boolean finished = false;
+            @Override
+            public void action() {
+                MessageTemplate mt = MessageTemplate.MatchProtocol(id);
+                ACLMessage rcv = receive(mt);
+                if (rcv != null) {
+                    OfferMessage offer = parser.fromJson(rcv.getContent(), OfferMessage.class);
+                    boolean allOffersArrived = true;
+                    for (int i = 0; i < PlanMap.get(productId).size(); i++){
+                        if(PlanMap.get(productId).get(i)._messageContent.getId() == id){
+                            PlanMap.get(productId).get(i)._productionEnd = offer.getProductionEnd();
+                        }
+                        else if(PlanMap.get(productId).get(i)._productionEnd == 0){
+                            allOffersArrived = false;
+                        }
+                    }
+                    if(allOffersArrived){
+                        addBehaviour(ChooseOffer(productId));
+                    }
+                    finished = true;
+                } else
+                    block();
+            }
+            @Override
+            public boolean done() {
+                return finished;
+            }
+        };
+    }
+    SimpleBehaviour ChooseOffer(Integer productId){
+        return new SimpleBehaviour() {
+            boolean finished = false;
+            @Override
+            public void action() {
+                long bestTime = Long.MAX_VALUE;
+                int bestIdx = 0;
+                for (int i = 0; i < PlanMap.get(productId).size(); i++){
+                    if(PlanMap.get(productId).get(i)._productionEnd < bestTime){
+                        bestIdx = i;
+                        bestTime = PlanMap.get(productId).get(i)._productionEnd;
+                    }
+                }
+                PlanElement planElem = PlanMap.get(productId).get(bestIdx);
+                addBehaviour(GetProduct(productId, planElem._messageContent.getId()));
+                ACLMessage msg = new ACLMessage();
+                msg.addReceiver(planElem._receiver);
+                msg.setProtocol("acceptOffer");
+                AcceptOfferMessage messageContent = new AcceptOfferMessage(planElem._messageContent.getId());
+                msg.setContent(parser.toJson(messageContent));
+                send(msg);
+                finished = true;
+            }
+            @Override
+            public boolean done() {
+                return finished;
+            }
+        };
+    }
+    SimpleBehaviour GetProduct(Integer productId, String id){
+        return new SimpleBehaviour() {
+            boolean finished = false;
+            @Override
+            public void action() {
+                MessageTemplate mt = MessageTemplate.MatchProtocol("product" + id);
+                ACLMessage rcv = receive(mt);
+                if (rcv != null) {
+                    String productName = PlanMap.get(productId).get(0)._messageContent.GetProductName();
+                    DoneProducts.add(new DoneProduct(productName, productId, id));
+                    finished = true;
+                } else
+                    block();
+            }
+            @Override
+            public boolean done() {
+                return finished;
+            }
+        };
     }
 }

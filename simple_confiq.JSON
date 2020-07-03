@@ -6,13 +6,13 @@
          "actions":[
             {
                "productName":"car",
-               "stageId":1,
+               "stageId":2,
                "actionName":"main body assembly",
                "productionTime":60
             },
 			{
                "productName":"car",
-               "stageId":1,
+               "stageId":2,
                "actionName":"welding",
                "productionTime":60
             },
@@ -42,7 +42,7 @@
          "actions":[
             {
                "productName":"car",
-               "stageId":2,
+               "stageId":1,
                "actionName":"fixing seats",
                "productionTime":100
             }
@@ -54,7 +54,7 @@
          "actions":[
             {
                "productName":"car",
-               "stageId":2,
+               "stageId":1,
                "actionName":"fixing engine",
                "productionTime":100
             }
@@ -78,7 +78,7 @@
          "name":"car",
          "stages":[
             {
-               "stageId":1,
+               "stageId":2,
                "actions":[
                   {
                      "actionName":"main body assembly",
@@ -89,7 +89,7 @@
                ]
             },
             {
-               "stageId":2,
+               "stageId":1,
                "actions":[
                   {
                      "actionName":"fixing seats",

@@ -98,7 +98,7 @@ public class ManagerAgent extends Agent {
                         .anyMatch(a -> a.productName.equals(action.productName) && !a.actionName.equals(action.actionName)
                                 && (a.stageId == action.stageId || a.stageId == action.stageId - 1)))
                         .map(m -> new MachineReference(m)).collect(Collectors.toList());
-                sameProdMachines.put(action.actionName, sameProductMachines);
+                sameProdMachines.put(action.productName, sameProductMachines);
                 //wybieramy definicje produktów, w produkcji których bierze udział maszyna
                 if(!productsDefinitions.containsKey(action.productName)){
                     productsDefinitions.put(action.productName, products.get(action.productName));
