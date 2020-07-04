@@ -8,19 +8,19 @@
                "productName":"car",
                "stageId":2,
                "actionName":"main body assembly",
-               "productionTime":60
+               "productionTime":10
             },
 			{
                "productName":"car",
                "stageId":2,
                "actionName":"welding",
-               "productionTime":60
+               "productionTime":10
             },
             {
                "productName":"engine",
                "stageId":1,
                "actionName":"engine assembly",
-               "productionTime":500
+               "productionTime":100
             }
          ]
       },
@@ -32,7 +32,7 @@
                "productName":"engine",
                "stageId":1,
                "actionName":"engine assembly",
-               "productionTime":200
+               "productionTime":40
             }
          ]
       },
@@ -44,7 +44,7 @@
                "productName":"car",
                "stageId":1,
                "actionName":"fixing seats",
-               "productionTime":100
+               "productionTime":20
             }
          ]
       },
@@ -56,7 +56,7 @@
                "productName":"car",
                "stageId":1,
                "actionName":"fixing engine",
-               "productionTime":100
+               "productionTime":20
             }
          ]
       },
@@ -68,7 +68,7 @@
                "productName":"seats",
                "stageId":1,
                "actionName":"seats assembly",
-               "productionTime":200
+               "productionTime":40
             }
          ]
       }
@@ -146,12 +146,12 @@
          "demandedProducts":[
             {
                "name":"car",
-               "amount":100,
+               "amount":50,
                "priority":2
             },
             {
                "name":"engine",
-               "amount":300,
+               "amount":150,
                "priority":5
             }
          ]
@@ -161,12 +161,12 @@
          "demandedProducts":[
             {
                "name":"car",
-               "amount":50,
+               "amount":25,
                "priority":4
             },
             {
                "name":"engine",
-               "amount":300,
+               "amount":150,
                "priority":1
             }
          ]
@@ -176,12 +176,12 @@
          "demandedProducts":[
             {
                "name":"car",
-               "amount":50,
+               "amount":25,
                "priority":4
             },
             {
                "name":"engine",
-               "amount":300,
+               "amount":150,
                "priority":1
             }
          ],

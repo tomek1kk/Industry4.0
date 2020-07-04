@@ -8,13 +8,7 @@ import jade.core.behaviours.SimpleBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import jade.proto.ContractNetInitiator;
-//import org.graalvm.compiler.nodes.memory.PluginFactory_MemoryAnchorNode;
-
-import java.nio.file.attribute.AclEntry;
 import java.util.*;
-
-//System.currentTimeMillis()
 
 
 public class SimulationAgent extends Agent {
@@ -175,6 +169,7 @@ public class SimulationAgent extends Agent {
                 if (rcv != null) {
                     String productName = PlanMap.get(productId).get(0)._messageContent.GetProductName();
                     DoneProducts.add(new DoneProduct(productName, productId, id));
+                    System.out.println(DoneProducts.size());
                     finished = true;
                 } else
                     block();

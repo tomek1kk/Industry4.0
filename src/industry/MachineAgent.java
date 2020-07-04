@@ -6,6 +6,7 @@ import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.SimpleBehaviour;
+import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import java.util.*;
@@ -19,6 +20,7 @@ public class MachineAgent extends Agent {
     int lastGenerated = 0;
     Map<String, Map<String, List<PlanElement>>> PlanMap = new HashMap<String, Map<String, List<PlanElement>>>();
     List<List<ProduceElement>> ProduceList = new LinkedList<List<ProduceElement>>();
+    ProduceElement currProdElement;
 
     @Override
     protected void setup() {
@@ -50,6 +52,7 @@ public class MachineAgent extends Agent {
             }
         };
         InitProductionList();
+        addBehaviour(Produce);
         addBehaviour(initMachine);
         addBehaviour(GetPlan());
         addBehaviour(GetAcceptOffer());
@@ -183,7 +186,7 @@ public class MachineAgent extends Agent {
         if(!tmpSubProductList.get(0)._lastProcess){
             subProductList = tmpSubProductList;
         }
-        ProduceElement prodElement = new ProduceElement(subProductList, tmpSubProductList.get(0)._messageContent);
+        ProduceElement prodElement = new ProduceElement(subProductList, tmpSubProductList.get(0)._upperMessageContent);
         ProduceList.get(tmpSubProductList.get(0)._upperMessageContent.getPriority()).add(prodElement);
         for(int i = 0; i < subProductList.size(); i++){
             AcceptOffer(message.getId(), subProductList.get(i));
@@ -410,114 +413,44 @@ public class MachineAgent extends Agent {
             }
         };
     }
+    Behaviour Produce = new TickerBehaviour(this, 500) {
+        @Override
+        public void onTick() {
+            if(currProdElement != null){
+                addBehaviour(SendProduct(currProdElement));
+                currProdElement = null;
+            }
+            for(int i = 9; i >= 0; i--){
+                for(int j = 0; j < ProduceList.get(i).size(); j++){
+                    if(ProduceList.get(i).get(j)._readyToProduce){
+                        currProdElement = ProduceList.get(i).get(j);
+                        ProduceList.get(i).remove(j);
+                        break;
+                    }
+                }
+                if(currProdElement != null)
+                    break;
+            }
+            if(currProdElement != null){
+                MachineAction action = FindAction(currProdElement._planMessage);
+                reset(action.productionTime);
+            }
+        }
+    };
+    SimpleBehaviour SendProduct(ProduceElement product) {
+        return new SimpleBehaviour() {
+            @Override
+            public void action() {
+                ACLMessage msg = new ACLMessage();
+                msg.addReceiver(new AID(product._planMessage.getRequestingAgent(), AID.ISLOCALNAME));
+                msg.setProtocol("product"+product._planMessage.getId());
+                send(msg);
+            }
+
+            @Override
+            public boolean done() {
+                return true;
+            }
+        };
+    }
 }
-//        Behaviour Cfp1Responder = new ContractNetResponder(this, MessageTemplate.MatchProtocol("cfp1")) { //wykorzystanie pola protocol do filtrowania wiadomości
-//            @Override
-//            protected ACLMessage handleCfp(ACLMessage m) {
-//
-//                Cfp1 messageContent = parser.fromJson(m.getContent(), Cfp1.class);
-//                System.out.println(machine.machineId + " got request: " + messageContent.GetActionName() + "from " + messageContent.getRequestingAgent());
-//
-//                MachineAction requestedAction = FindAction(messageContent);
-//                if(requestedAction == null) {
-//                    return new ACLMessage(ACLMessage.REFUSE);
-//                }
-//
-//                InformationCenter ic = InformationCenter.getInstance();
-//                Product requestedProduct = ic.products.get(requestedAction.productName);
-//                Map<Integer, List<String>> bookedActions = messageContent.getBookedActions();
-//                ProductAction action = requestedProduct.stages.get(requestedAction.stageId)
-//                        .stream().filter(a -> a.actionName.equals(requestedAction.actionName))
-//                        .findAny().get();
-//                if (bookedActions.get(messageContent.GetStageId()) != null) {
-//                    bookedActions.get(messageContent.GetStageId()).add(action.actionName);
-//                }
-//                else
-//                    bookedActions.put(messageContent.GetStageId(), new ArrayList<String>() { {add(action.actionName);}});
-//                List<String> subproducts = new ArrayList<String>(action.subproducts);
-//                subproducts.forEach(p -> {
-//                    final Product product = ic.products.get(p);
-//                    subproductMachines.get(p).forEach(machine -> {
-//                        int stageId = Collections.max(product.stages.keySet());
-//                        product.stages.get(stageId).forEach(a -> {
-//                            Cfp1 request = new Cfp1(p, a.actionName, stageId, messageContent.getPriority(),
-//                                    messageContent.getProductId(), bookedActions, getLocalName());
-//                            sendRequest(machine.name, request);
-//                        });
-//
-//                    });
-//                });
-//
-//                requestedProduct.stages.get(messageContent.GetStageId()).stream().filter(a ->
-//                    bookedActions.get(messageContent.GetStageId()).contains(a.actionName) == false
-//                ).forEach(productAction -> {
-//                    Cfp1 request = new Cfp1(requestedProduct.name, productAction.actionName, messageContent.GetStageId(),
-//                            messageContent.getPriority(),
-//                            messageContent.getProductId(), bookedActions, getLocalName());
-//                    if (sameProductMachines.containsKey(requestedProduct.name)) {
-//                        sameProductMachines.get(requestedProduct.name).forEach(machine -> {
-//                            if (machine.machine.actions.stream().map(a -> a.actionName).collect(Collectors.toList()).contains(productAction.actionName))
-//                                sendRequest(machine.name, request);
-//                        });
-//                    }
-//                });
-//
-//                Cfp2 responseContent = new Cfp2(productionQueue.size(), requestedAction.productionTime, null, 1);
-//                ACLMessage response = new ACLMessage(ACLMessage.PROPOSE);
-//                response.setContent(parser.toJson(responseContent));
-//                return response;
-//            }
-//
-//            @Override
-//            protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose, ACLMessage accept) {
-//                Cfp1 messageContent = parser.fromJson(cfp.getContent(), Cfp1.class);
-//                //TODO: umieszczenie w kolejce i produkcja
-//                return new ACLMessage(ACLMessage.INFORM);
-//            }
-//        };
-//        addBehaviour(Cfp1Responder);
-//}
-
-
-//    private Behaviour Cfp1Requester (ACLMessage messageRequest, ACLMessage messageAcceptProposal){
-//        return new ContractNetInitiator(this, messageRequest) {
-//            @Override
-//            protected void handleAllResponses(Vector responses, Vector acceptances) {
-//                Enumeration e = responses.elements();
-//                ACLMessage bestProposeReply = null;
-//                Integer metric = Integer.MAX_VALUE;
-//                while (e.hasMoreElements()) {
-//                    ACLMessage msg = (ACLMessage) e.nextElement();
-//                    if (msg.getPerformative() == ACLMessage.PROPOSE) {
-//                        ACLMessage reply = msg.createReply();
-//                        reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
-//                        acceptances.addElement(reply);
-//                        Cfp2 proposeMessage = parser.fromJson(msg.getContent(), Cfp2.class);
-//                        if(CalculateMetric(proposeMessage) < metric){
-//                            bestProposeReply = reply;
-//                            metric = CalculateMetric(proposeMessage);
-//                        }
-//                    }
-//                }
-//                if (acceptances.size() > 0) {
-//                    bestProposeReply = messageAcceptProposal;
-//                } else {
-//                    System.out.println("No machine that make this product");
-//                }
-//            }
-////            @Override
-////            protected void handleAllResultNotifications(Vector resultNotifications) { }
-//        };
-//    }
-//    private Integer CalculateMetric(Cfp2 proposeMessage){
-//        return proposeMessage.getAmountInQueue() * proposeMessage.getProductionTime(); //prosta heurystyka
-//    }
-//}
-
-//    private void sendRequest(String machine, Cfp1 request) {
-//        ACLMessage msg = new ACLMessage(ACLMessage.CFP);
-//        msg.addReceiver(new AID(machine, AID.ISLOCALNAME));
-//        msg.setContent(parser.toJson(request));
-//        msg.setProtocol("cfp1");
-//        send(msg);
-//    }
