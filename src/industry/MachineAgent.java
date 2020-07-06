@@ -9,6 +9,8 @@ import jade.core.behaviours.SimpleBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+
+import java.sql.Time;
 import java.util.*;
 
 public class MachineAgent extends Agent {
@@ -21,6 +23,7 @@ public class MachineAgent extends Agent {
     Map<String, Map<String, List<PlanElement>>> PlanMap = new HashMap<String, Map<String, List<PlanElement>>>();
     List<List<ProduceElement>> ProduceList = new LinkedList<List<ProduceElement>>();
     ProduceElement currProdElement;
+    List<TimeElement> TimeAxis = new LinkedList<TimeElement>();
 
     @Override
     protected void setup() {
@@ -160,16 +163,23 @@ public class MachineAgent extends Agent {
         }
         return Integer.toString(machine.machineId) + id;
     }
-    private long GetFinalProductionEnd(Collection<Long> times){
+    private long GetFinalProductionEnd(int priority, int prodTime, Collection<Long> times){
         long lastSubProdTime = Collections.max(times);
-        return lastSubProdTime;
-        //TODO: dodać sprawdzenie czasu wolnego w liście produkcji (ewentualnie aktualizacje czasów)
+        return GetFinalProductionEnd(priority, prodTime, lastSubProdTime);
     }
-    private long GetFinalProductionEnd(){
-        return System.currentTimeMillis();
-        //TODO: dodać sprawdzenie czasu wolnego w liście produkcji (ewentualnie aktualizacje czasów)
+    private long GetFinalProductionEnd(int priority, int prodTime, long possibleStartTime){
+        for(int i = 0; i < TimeAxis.size(); i++) {
+            if(TimeAxis.get(i)._priority >= priority) {
+                if(TimeAxis.get(i)._startTime - possibleStartTime > prodTime) {
+                    return possibleStartTime + prodTime;
+                }
+                else {
+                    possibleStartTime = TimeAxis.get(i)._endTime;
+                }
+            }
+        }
+        return possibleStartTime + prodTime;
     }
-
     private void HandleAcceptOffer(AcceptOfferMessage message){
         Map<String, List<PlanElement>> planMapNode = PlanMap.get(message.getId());
         List<PlanElement> tmpSubProductList = new LinkedList<PlanElement>();
@@ -186,8 +196,8 @@ public class MachineAgent extends Agent {
         if(!tmpSubProductList.get(0)._lastProcess){
             subProductList = tmpSubProductList;
         }
-        ProduceElement prodElement = new ProduceElement(subProductList, tmpSubProductList.get(0)._upperMessageContent);
-        ProduceList.get(tmpSubProductList.get(0)._upperMessageContent.getPriority()).add(prodElement);
+        ProduceElement prodElement = new ProduceElement(subProductList, tmpSubProductList.get(0)._upperMessageContent, tmpSubProductList.get(0)._lastPlanSubproductTime);
+        AddToProduceList(prodElement);
         for(int i = 0; i < subProductList.size(); i++){
             AcceptOffer(message.getId(), subProductList.get(i));
         }
@@ -279,12 +289,13 @@ public class MachineAgent extends Agent {
         if (bookedActions.get(plan.GetStageId()).size() == requestedProduct.stages.get(plan.GetStageId()).size())
             --tmpPrevStageId;
         if (tmpPrevStageId == 0) {
-            long productionTime = GetFinalProductionEnd();
-            productionTime += FindAction(plan.GetActionName(), plan.GetStageId(), plan.GetProductName()).productionTime;
+            long productionTime = GetFinalProductionEnd(plan.getPriority(), FindAction(plan.GetActionName(), plan.GetStageId(),
+                    plan.GetProductName()).productionTime, System.currentTimeMillis());
             List<PlanElement> lastActionPlanList = new LinkedList<PlanElement>();
             PlanElement lastActionPlanElement = new PlanElement(null, null, null, new AID(plan.getRequestingAgent(), AID.ISLOCALNAME), plan);
             lastActionPlanElement._lastProcess = true;
             lastActionPlanElement._bestOffer = true;
+            lastActionPlanElement._lastPlanSubproductTime = System.currentTimeMillis();
             lastActionPlanList.add(lastActionPlanElement);
             tmpPlanMap.put("lastAction", lastActionPlanList);
             PlanMap.put(plan.getId(), tmpPlanMap);
@@ -299,9 +310,6 @@ public class MachineAgent extends Agent {
         ).forEach(productAction -> {
             PlanMessage msg = new PlanMessage(requestedProduct.name, productAction.actionName, prevStageId, plan.getPriority(),
                     bookedActions, getLocalName(), "dummyID");
-            if(sameProductMachines.get(plan.GetProductName()) == null){
-                System.out.println("dupa");
-            }
             sameProductMachines.get(plan.GetProductName()).forEach(subMachine -> {
                 subMachine.machine.actions.forEach(machineAction -> {
                     if (MachineActionMatch(machineAction, requestedProduct.name, prevStageId, productAction.actionName)) {
@@ -400,10 +408,14 @@ public class MachineAgent extends Agent {
                         }
                     }
                 }
+                long lastSubproductTime = Collections.max(offersTimes.values());
                 for(int i = 0; i < keys.length; i++){
                     PlanMap.get(productId).get(keys[i]).get(offersIdx.get(keys[i]))._bestOffer = true;
+                    PlanMap.get(productId).get(keys[i]).get(offersIdx.get(keys[i]))._lastPlanSubproductTime = lastSubproductTime;
                 }
-                long finalProductionEnd = GetFinalProductionEnd(offersTimes.values());
+                PlanMessage productPlan = PlanMap.get(productId).get(keys[0]).get(0)._upperMessageContent;
+                long finalProductionEnd = GetFinalProductionEnd(productPlan.getPriority(),
+                        FindAction(productPlan.GetActionName(), productPlan.GetStageId(), productPlan.GetProductName()).productionTime, offersTimes.values());
                 ReturnOffer(productId, finalProductionEnd, PlanMap.get(productId).get(keys[0]).get(0)._requestingAgent.getLocalName());
                 finished = true;
             }
@@ -446,11 +458,39 @@ public class MachineAgent extends Agent {
                 msg.setProtocol("product"+product._planMessage.getId());
                 send(msg);
             }
-
             @Override
             public boolean done() {
                 return true;
             }
         };
+    }
+    private void AddToProduceList(ProduceElement prodElement){
+        int priority = prodElement._planMessage.getPriority();
+        ProduceList.get(priority).add(prodElement);
+        TimeAxis = new LinkedList<TimeElement>();
+        for(int i = 9; i >= 0; i--){
+            for(int j = 0; j < ProduceList.get(i).size(); j++){
+                long possibleStart = ProduceList.get(i).get(j)._lastPlanSubproductTime;
+                int prodTime = FindAction(prodElement._planMessage).productionTime;
+                boolean notAdded = true;
+                for(int k = 0; k < TimeAxis.size(); k++){
+                    if(TimeAxis.get(k)._startTime - possibleStart > prodTime){
+                        TimeAxis.add(k, new TimeElement(possibleStart, possibleStart + prodTime, ProduceList.get(i).get(j)._planMessage.getPriority()));
+                        ProduceList.get(i).get(j)._productionTimeStart = possibleStart;
+                        ProduceList.get(i).get(j)._productionTimeEnd = possibleStart + prodTime;
+                        notAdded = false;
+                        break;
+                    }
+                    else{
+                        possibleStart = TimeAxis.get(k)._endTime;
+                    }
+                }
+                if(notAdded){
+                    TimeAxis.add(new TimeElement(possibleStart, possibleStart + prodTime, ProduceList.get(i).get(j)._planMessage.getPriority()));
+                    ProduceList.get(i).get(j)._productionTimeStart = possibleStart;
+                    ProduceList.get(i).get(j)._productionTimeEnd = possibleStart + prodTime;
+                }
+            }
+        }
     }
 }

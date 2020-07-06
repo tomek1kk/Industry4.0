@@ -12,6 +12,7 @@ public class PlanElement {
     public boolean _bestOffer;
     public boolean _lastProcess;
     public boolean _obtained;
+    public Long _lastPlanSubproductTime;
     public PlanMessage _upperMessageContent;
     public PlanElement(PlanMessage messageContent, ACLMessage aclMessage, AID receiver, AID requestingAgent, PlanMessage upperMessageContent){
         _messageContent = messageContent;
@@ -23,5 +24,6 @@ public class PlanElement {
         _lastProcess = false;
         _obtained = false;
         _upperMessageContent = upperMessageContent;
+        _lastPlanSubproductTime = null;
     }
 }
