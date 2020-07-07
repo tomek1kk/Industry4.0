@@ -41,6 +41,14 @@ public class ManagerAgent extends Agent {
         ic.addMachine(m);
     }
 
+    protected void parseBreakDownObject(JsonObject breakdown, InformationCenter ic) {
+        int machineId = breakdown.get("machineId").getAsInt();
+        int breakTime = breakdown.get("breakTime").getAsInt();
+        int duration = breakdown.get("duration").getAsInt();
+
+        ic.addBreakdown(new Breakdown(machineId, breakTime, duration));
+    }
+
     protected void parseProductObject(JsonObject product, InformationCenter ic) {
         String productName = product.get("name").getAsString();
         HashMap<Integer, List<ProductAction>> stages = new HashMap<Integer, List<ProductAction>>();
@@ -153,6 +161,9 @@ public class ManagerAgent extends Agent {
 
                         JsonArray simulations = jsonObject.get("simulation").getAsJsonArray();
                         simulations.forEach(s -> parseSimulationObject(s.getAsJsonObject(), ic));
+
+                        JsonArray breakdowns = jsonObject.get("breakdowns").getAsJsonArray();
+                        simulations.forEach(b -> parseBreakDownObject(b.getAsJsonObject(), ic));
 
                         reader.close();
                     }

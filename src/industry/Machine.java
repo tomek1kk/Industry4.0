@@ -9,7 +9,7 @@ public class Machine {
     public int machineId;
     public int socketId;
     public List<MachineAction> actions;
-    public Machine(int machineId, int socketId,  List<MachineAction> actions)
+    public Machine(int machineId, int socketId, List<MachineAction> actions)
     {
         this.machineId = machineId;
         this.socketId = socketId;

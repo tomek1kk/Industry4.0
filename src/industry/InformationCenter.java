@@ -8,6 +8,7 @@ public class InformationCenter {
     public HashMap<Integer, Machine> machines;
     public HashMap<String, Product> products;
     public ArrayList<Simulation> simulations;
+    public ArrayList<Breakdown> breakdowns;
 
     private static InformationCenter instance;
 
@@ -22,6 +23,7 @@ public class InformationCenter {
         machines = new HashMap<Integer, Machine>();
         products = new HashMap<String, Product>();
         simulations = new ArrayList<Simulation>();
+        breakdowns = new ArrayList<Breakdown>();
     }
     public void addMachine(Machine m)
     {
@@ -37,5 +39,11 @@ public class InformationCenter {
     {
         simulations.add(s);
         System.out.println("Simulation added");
+    }
+
+    public void addBreakdown(Breakdown br)
+    {
+        breakdowns.add(br);
+        System.out.println("Breakdown added");
     }
 }
