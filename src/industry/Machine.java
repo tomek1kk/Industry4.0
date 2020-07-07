@@ -6,11 +6,14 @@ import java.util.List;
 import java.util.Map;
 
 public class Machine {
-    public int id;
-    public HashMap<String,Integer> products;
-    public Machine(int id, HashMap<String,Integer> products)
+    public int machineId;
+    public int socketId;
+    public List<MachineAction> actions;
+    public Machine(int machineId, int socketId,  List<MachineAction> actions)
     {
-        this.id = id;
-        this.products = products;
+        this.machineId = machineId;
+        this.socketId = socketId;
+        this.actions = actions;
     }
 }
+

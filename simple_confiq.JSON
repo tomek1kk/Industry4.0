@@ -1,115 +1,196 @@
 {
-	"machines": [{
-			"id": 1,
-			"products": [{
-				"name": "shoe",
-				"productionTime": 60
-			}]
-		},
-		{
-			"id": 2,
-			"products": [{
-					"name": "shoe",
-					"productionTime": 120
-				},
-				{
-					"name": "upper",
-					"productionTime": 240
-				},
-				{
-					"name": "shoelace",
-					"productionTime": 120
-				},
-				{
-					"name": "sole",
-					"productionTime": 300
-				}
-			]
-		},
-		{
-			"id": 3,
-			"products": [{
-				"name": "shoelace",
-				"productionTime": 40
-			}]
-		},
-		{
-			"id": 4,
-			"products": [{
-				"name": "upper",
-				"productionTime": 100
-			}]
-		},
-		{
-			"id": 5,
-			"products": [{
-				"name": "sole",
-				"productionTime": 200
-			}]
-		}
-	],
-	"products": [{
-			"name": "upper",
-			"subproducts": []
-		},
-		{
-			"name": "shoelace",
-			"subproducts": []
-		},
-		{
-			"name": "sole",
-			"subproducts": []
-		}
-		,{
-			"name": "shoe",
-			"subproducts": ["upper", "shoelace", "sole"]
-		}
-	],
-	"simulation": [{
-			"duration": 7200,
-			"demandedProducts": [{
-					"name": "shoe",
-					"amount": 100,
-					"priority": 2
-				},
-				{
-					"name": "shoelace",
-					"amount": 300,
-					"priority": 5
-				}
-			]
-		},
-		{
-			"duration": 3600,
-			"demandedProducts": [{
-					"name": "shoe",
-					"amount": 50,
-					"priority": 4
-				},
-				{
-					"name": "shoelace",
-					"amount": 300,
-					"priority": 1
-				}
-			]
-		},
-		{
-			"duration": 3600,
-			"demandedProducts": [{
-					"name": "shoe",
-					"amount": 50,
-					"priority": 4
-				},
-				{
-					"name": "shoelace",
-					"amount": 300,
-					"priority": 1
-				}
-			],
-			"breakdowns": [{
-				"machineId": 1,
-				"duration": 1800
-			}]
-		}
-	]
+   "machines":[
+      {
+         "machineId":1,
+         "socketId":1,
+         "actions":[
+            {
+               "productName":"car",
+               "stageId":2,
+               "actionName":"main body assembly",
+               "productionTime":10
+            },
+			{
+               "productName":"car",
+               "stageId":2,
+               "actionName":"welding",
+               "productionTime":100
+            },
+            {
+               "productName":"engine",
+               "stageId":1,
+               "actionName":"engine assembly",
+               "productionTime":100
+            }
+         ]
+      },
+      {
+         "machineId":2,
+         "socketId":1,
+         "actions":[
+            {
+               "productName":"engine",
+               "stageId":1,
+               "actionName":"engine assembly",
+               "productionTime":40
+            }
+         ]
+      },
+      {
+         "machineId":3,
+         "socketId":2,
+         "actions":[
+            {
+               "productName":"car",
+               "stageId":1,
+               "actionName":"fixing seats",
+               "productionTime":20
+            }
+         ]
+      },
+      {
+         "machineId":4,
+         "socketId":2,
+         "actions":[
+            {
+               "productName":"car",
+               "stageId":1,
+               "actionName":"fixing engine",
+               "productionTime":20
+            }
+         ]
+      },
+      {
+         "machineId":5,
+         "socketId":2,
+         "actions":[
+            {
+               "productName":"seats",
+               "stageId":1,
+               "actionName":"seats assembly",
+               "productionTime":40
+            }
+         ]
+      }
+   ],
+   "products":[
+      {
+         "name":"car",
+         "stages":[
+            {
+               "stageId":2,
+               "actions":[
+                  {
+                     "actionName":"main body assembly",
+                     "subproducts":[
+
+                     ]
+                  }
+               ]
+            },
+            {
+               "stageId":1,
+               "actions":[
+                  {
+                     "actionName":"fixing seats",
+                     "subproducts":[
+                        "seats"
+                     ]
+                  },
+                  {
+                     "actionName":"fixing engine",
+                     "subproducts":[
+                        "engine"
+                     ]
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name":"seats",
+         "stages":[
+            {
+               "stageId":1,
+               "actions":[
+                  {
+                     "actionName":"seats assembly",
+                     "subproducts":[
+
+                     ]
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name":"engine",
+         "stages":[
+            {
+               "stageId":1,
+               "actions":[
+                  {
+                     "actionName":"engine assembly",
+                     "subproducts":[
+
+                     ]
+                  }
+               ]
+            }
+         ]
+      }
+   ],
+   "simulation":[
+      {
+         "duration":7200,
+         "demandedProducts":[
+            {
+               "name":"car",
+               "amount":50,
+               "priority":2
+            },
+            {
+               "name":"engine",
+               "amount":150,
+               "priority":5
+            }
+         ]
+      },
+      {
+         "duration":3600,
+         "demandedProducts":[
+            {
+               "name":"car",
+               "amount":25,
+               "priority":4
+            },
+            {
+               "name":"engine",
+               "amount":150,
+               "priority":1
+            }
+         ]
+      },
+      {
+         "duration":3600,
+         "demandedProducts":[
+            {
+               "name":"car",
+               "amount":25,
+               "priority":4
+            },
+            {
+               "name":"engine",
+               "amount":150,
+               "priority":1
+            }
+         ],
+         "breakdowns":[
+            {
+               "machineId":1,
+               "duration":1800
+            }
+         ]
+      }
+   ]
 }

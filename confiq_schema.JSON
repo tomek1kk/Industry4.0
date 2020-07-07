@@ -1,98 +1,178 @@
+//produkty: akcje w ramach jednego stage mogą być wykonywane w różnej kolejności
+
+//maszyny: gniazdo dodane jako pole w maszynie, jedyne zastosowanie gniazd jakie wymyśliłem to takie
+//że transport w ramach tego samego soketa nie zabierałby czasu, a pomiędzy soketami zabierałby
+
+//in/outBufferCapacity wielkośc buforów maszyny, narazie robimy bez tego
+
+//opis przykładu: produkt końcowy samchód, w stage 1 tworzona jest skorupa samochodu,
+//a w stage 2 montowane fotele i montowany silnik w dowolnej kolejności
+
 {
-	"$schema": "http://json-schema.org/schema#",
-	"type": "object",
-	"required": ["machines", "products", "simulation"],
-	"properties": {
-		"machines": {
-			"type": "array",
-			"items": {
-				"type": "object",
-				"required": ["id", "products"],
-				"properties": {
-					"id": {
-						"type": "integer"
-					},
-					"products": {
-						"type": "array",
-						"items": {
-							"type": "object",
-							"required": ["name", "productionTime"],
-							"properties": {
-								"name": {
-									"type": "string"
-								},
-								"productionTime": {
-									"type": "integer",
-									"minimum": 0
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"products": {
-			"type": "array",
-			"items": {
-				"type": "object",
-				"required": ["name", "subproducts"],
-				"properties": {
-					"name": {
-						"type": "string"
-					},
-					"subproducts": {
-						"type": "array",
-						"items": {
-							"type": "string"
-						}
-					}
-				}
-			}
-		},
-		"simulation": {
-			"type": "array",
-			"items": {
-				"type": "object",
-				"required": ["duration", "demandedProducts"],
-				"properties": {
-					"duration": {
-						"type": "integer",
-						"minimum": 0
-					},
-					"demandedProducts": {
-						"type": "array",
-						"items": {
-							"type": "object",
-							"required": ["name", "amount", "priority"],
-							"properties": {
-								"name": {
-									"type": "string"
-								},
-								"amount": {
-									"type": "integer",
-									"minimum": 1
-								},
-								"priority": {
-									"type": "integer",
-									"minimum": 1,
-									"maximum": 10
-								}
-							}
-						}
-					},
-					"breakdowns": {
-					    "type": "array",
-						"items": {
-						    "type": "object",
-							"required": ["machineId", "duration"],
-							"properties":{
-							    "machineId": {"type": "integer"},
-								"duration": {"type": "integer", "minimum": 1}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+   "$schema":"http://json-schema.org/schema#",
+   "type":"object",
+   "required":[
+      "machines",
+      "products",
+      "simulation"
+   ],
+   "properties":{
+      "machines":{
+         "type":"array",
+         "items":{
+            "type":"object",
+            "required":[
+               "machineId",
+               "socketId",
+               "actions"
+            ],
+            "properties":{
+               "machineId":{
+                  "type":"integer"
+               },
+               "socketId":{
+                  "type":"integer"
+               },
+               "actions":{
+                  "type":"array",
+                  "items":{
+                     "type":"object",
+                     "required":[
+                        "productName",
+                        "stageId",
+                        "actionName",
+                        "productionTime"
+                     ],
+                     "properties":{
+                        "productName":{
+                           "type":"string"
+                        },
+                        "stageId":{
+                           "type":"integer"
+                        },
+                        "actionName":{
+                           "type":"string"
+                        },
+                        "productionTime":{
+                           "type":"integer",
+                           "minimum":0
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      },
+      "products":{
+         "type":"array",
+         "items":{
+            "type":"object",
+            "required":[
+               "name",
+               "stages"
+            ],
+            "properties":{
+               "name":{
+                  "type":"string"
+               },
+               "stages":{
+                  "type":"array",
+                  "items":{
+                     "type":"object",
+                     "required":[
+                        "stageId",
+                        "actions"
+                     ],
+                     "properties":{
+                        "stageId":{
+                           "type":"integer"
+                        },
+                        "actions":{
+                           "type":"array",
+                           "items":{
+                              "type":"object",
+                              "required":[
+                                 "actionName",
+                                 "subproducts"
+                              ],
+                              "properties":{
+                                 "actionName":{
+                                    "type":"string"
+                                 },
+                                 "subproducts":{
+                                    "type":"array",
+                                    "item":{
+                                       "type":"string"
+                                    }
+                                 }
+                              }
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      },
+      "simulation":{
+         "type":"array",
+         "items":{
+            "type":"object",
+            "required":[
+               "duration",
+               "demandedProducts"
+            ],
+            "properties":{
+               "duration":{
+                  "type":"integer",
+                  "minimum":0
+               },
+               "demandedProducts":{
+                  "type":"array",
+                  "items":{
+                     "type":"object",
+                     "required":[
+                        "name",
+                        "amount",
+                        "priority"
+                     ],
+                     "properties":{
+                        "name":{
+                           "type":"string"
+                        },
+                        "amount":{
+                           "type":"integer",
+                           "minimum":1
+                        },
+                        "priority":{
+                           "type":"integer",
+                           "minimum":0,
+                           "maximum":9
+                        }
+                     }
+                  }
+               },
+               "breakdowns":{
+                  "type":"array",
+                  "items":{
+                     "type":"object",
+                     "required":[
+                        "machineId",
+                        "duration"
+                     ],
+                     "properties":{
+                        "machineId":{
+                           "type":"integer"
+                        },
+                        "duration":{
+                           "type":"integer",
+                           "minimum":1
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
 }
