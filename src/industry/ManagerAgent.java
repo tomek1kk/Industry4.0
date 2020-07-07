@@ -154,6 +154,10 @@ public class ManagerAgent extends Agent {
                         JsonArray simulations = jsonObject.get("simulation").getAsJsonArray();
                         simulations.forEach(s -> parseSimulationObject(s.getAsJsonObject(), ic));
 
+                        int delay = jsonObject.get("socketDelay").getAsInt();
+                        ic.addSocketDelay(delay);
+                        System.out.println("delay kurde: " + delay);
+
                         reader.close();
                     }
                 catch (Exception e) {

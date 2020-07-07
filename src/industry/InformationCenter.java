@@ -8,6 +8,7 @@ public class InformationCenter {
     public HashMap<Integer, Machine> machines;
     public HashMap<String, Product> products;
     public ArrayList<Simulation> simulations;
+    public int socketDelay;
 
     private static InformationCenter instance;
 
@@ -37,5 +38,10 @@ public class InformationCenter {
     {
         simulations.add(s);
         System.out.println("Simulation added");
+    }
+    public void addSocketDelay(int d)
+    {
+        socketDelay = d;
+        System.out.println("Socket delay added");
     }
 }

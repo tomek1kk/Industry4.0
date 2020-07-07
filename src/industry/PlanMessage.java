@@ -7,6 +7,7 @@ import java.util.Map;
 
 public class PlanMessage {
     private String productName;
+    private int socketId;
     private Integer stageId;
     private String actionName;
     private Integer priority;
@@ -14,7 +15,7 @@ public class PlanMessage {
     private Map<Integer, List<String>> bookedActions; //zawiera akcje które już zostały zarezerwowane do wykonania
     private String requestingAgent;
     public PlanMessage(String productName, String actionName, Integer stageId, Integer priority,
-                       Map<Integer, List<String>> bookedActions, String requestingAgent, String id){
+                       Map<Integer, List<String>> bookedActions, String requestingAgent, String id, int socketId){
         this.productName = productName;
         this.stageId = stageId;
         this.actionName = actionName;
@@ -22,9 +23,10 @@ public class PlanMessage {
         this.bookedActions = bookedActions;
         this.requestingAgent = requestingAgent;
         this.id = id;
+        this.socketId = socketId;
     }
     public PlanMessage(PlanMessage that){
-        this (that.productName, that.actionName, that.stageId, that.priority, that.bookedActions, that.requestingAgent, that.id);
+        this (that.productName, that.actionName, that.stageId, that.priority, that.bookedActions, that.requestingAgent, that.id, that.socketId);
     }
     public String GetProductName() {
         return productName;
@@ -46,7 +48,7 @@ public class PlanMessage {
         this.id = id;
     }
     public String getRequestingAgent() { return requestingAgent; }
-
+    public int getSocketId() { return socketId; }
     public Map<Integer, List<String>> getBookedActions() {
         return bookedActions;
     }
