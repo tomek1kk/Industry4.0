@@ -210,6 +210,8 @@ public class MachineAgent extends Agent {
         msg.setProtocol("acceptOffer");
         AcceptOfferMessage messageContent = new AcceptOfferMessage(planElem._messageContent.getId());
         msg.setContent(parser.toJson(messageContent));
+        System.out.println("Agent " + planElem._requestingAgent.getLocalName() + " accept offer from " +
+                planElem._receiver.getLocalName());
         send(msg);
     }
     SimpleBehaviour GetProduct(String productId, String id){
@@ -445,6 +447,8 @@ public class MachineAgent extends Agent {
             }
             if(currProdElement != null){
                 MachineAction action = FindAction(currProdElement._planMessage);
+                System.out.println(getLocalName() + " started produce " + action.productName
+                    + ". Product will be ready in " + action.productionTime + " ms");
                 reset(action.productionTime);
             }
         }

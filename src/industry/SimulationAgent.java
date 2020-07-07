@@ -169,7 +169,7 @@ public class SimulationAgent extends Agent {
                 if (rcv != null) {
                     String productName = PlanMap.get(productId).get(0)._messageContent.GetProductName();
                     DoneProducts.add(new DoneProduct(productName, productId, id));
-                    System.out.println(DoneProducts.size());
+                    System.out.println("Got finished product: " + productName + ". Finished products: " + DoneProducts.size());
                     finished = true;
                 } else
                     block();

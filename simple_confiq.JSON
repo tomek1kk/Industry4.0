@@ -14,7 +14,7 @@
                "productName":"car",
                "stageId":2,
                "actionName":"welding",
-               "productionTime":10
+               "productionTime":100
             },
             {
                "productName":"engine",
