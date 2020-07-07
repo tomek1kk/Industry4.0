@@ -170,7 +170,7 @@ public class MachineAgent extends Agent {
     private long GetFinalProductionEnd(int priority, int prodTime, long possibleStartTime){
         for(int i = 0; i < TimeAxis.size(); i++) {
             if(TimeAxis.get(i)._priority >= priority) {
-                if(TimeAxis.get(i)._startTime - possibleStartTime > prodTime) {
+                if (TimeAxis.get(i)._startTime - possibleStartTime > prodTime) {
                     return possibleStartTime + prodTime;
                 }
                 else {
@@ -273,7 +273,7 @@ public class MachineAgent extends Agent {
                     subMachine.machine.actions.forEach(machineAction -> {
                         if (MachineActionMatch(machineAction, product.name, stageId, productAction.actionName)) {
                             PlanMessage msg = new PlanMessage(product.name, productAction.actionName, stageId, plan.getPriority(),
-                                    new HashMap<Integer, List<String>>(), getLocalName(), GenerateId());
+                                    new HashMap<Integer, List<String>>(), getLocalName(), GenerateId(), machine.socketId);
                             ACLMessage aclMessage = new ACLMessage();
                             aclMessage.setProtocol("plan");
                             AID receiver = new AID("Machine" + Integer.toString(subMachine.machine.machineId), AID.ISLOCALNAME);
@@ -311,7 +311,7 @@ public class MachineAgent extends Agent {
                 (prevStageId != plan.GetStageId() || bookedActions.get(prevStageId).contains(a.actionName) == false)
         ).forEach(productAction -> {
             PlanMessage msg = new PlanMessage(requestedProduct.name, productAction.actionName, prevStageId, plan.getPriority(),
-                    bookedActions, getLocalName(), "dummyID");
+                    bookedActions, getLocalName(), "dummyID", machine.socketId);
             sameProductMachines.get(plan.GetProductName()).forEach(subMachine -> {
                 subMachine.machine.actions.forEach(machineAction -> {
                     if (MachineActionMatch(machineAction, requestedProduct.name, prevStageId, productAction.actionName)) {
@@ -404,9 +404,13 @@ public class MachineAgent extends Agent {
                     offersIdx.put(keys[j], 0);
                     List<PlanElement> refPlanList = PlanMap.get(productId).get(keys[j]);
                     for (int i = 0; i < refPlanList.size(); i++) {
-                        if(refPlanList.get(i)._productionEnd < offersTimes.get(keys[j])){
+                        int delay = 0;
+                        int socketId = refPlanList.get(i)._messageContent.getSocketId();
+                        if (socketId != machine.socketId && socketId != -1)
+                            delay += InformationCenter.getInstance().socketDelay;
+                        if (refPlanList.get(i)._productionEnd + delay < offersTimes.get(keys[j])){
                             offersIdx.replace(keys[j], i);
-                            offersTimes.replace(keys[j], refPlanList.get(i)._productionEnd);
+                            offersTimes.replace(keys[j], refPlanList.get(i)._productionEnd + delay);
                         }
                     }
                 }
@@ -435,8 +439,8 @@ public class MachineAgent extends Agent {
                 currProdElement = null;
             }
             for(int i = 9; i >= 0; i--){
-                for(int j = 0; j < ProduceList.get(i).size(); j++){
-                    if(ProduceList.get(i).get(j)._readyToProduce){
+                for(int j = 0; j < ProduceList.get(i).size(); j++) {
+                    if (ProduceList.get(i).get(j)._readyToProduce) {
                         currProdElement = ProduceList.get(i).get(j);
                         ProduceList.get(i).remove(j);
                         break;

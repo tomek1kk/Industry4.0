@@ -149,7 +149,7 @@ public class ManagerAgent extends Agent {
                 Reader reader = null;
                 JsonParser parser = new JsonParser();
                 try {
-                        reader = Files.newBufferedReader(Paths.get("simple_confiq.JSON"));
+                        reader = Files.newBufferedReader(Paths.get("clothes-factory.JSON"));
                         JsonElement jsonTree = parser.parse(reader);
                         JsonObject jsonObject = jsonTree.getAsJsonObject();
 
@@ -162,6 +162,10 @@ public class ManagerAgent extends Agent {
                         JsonArray simulations = jsonObject.get("simulation").getAsJsonArray();
                         simulations.forEach(s -> parseSimulationObject(s.getAsJsonObject(), ic));
 
+                        int delay = jsonObject.get("socketDelay").getAsInt();
+                        ic.addSocketDelay(delay);
+                        System.out.println("delay kurde: " + delay);
+                  
                         JsonArray breakdowns = jsonObject.get("breakdowns").getAsJsonArray();
                         simulations.forEach(b -> parseBreakDownObject(b.getAsJsonObject(), ic));
 

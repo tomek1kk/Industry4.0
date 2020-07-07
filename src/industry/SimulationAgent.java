@@ -47,7 +47,7 @@ public class SimulationAgent extends Agent {
                         LinkedList<PlanElement> PlanList = new LinkedList<PlanElement>();
                         ic.products.get(product.name).stages.get(lastStageId).forEach(action ->{
                             PlanMessage requestContent = new PlanMessage(product.name, action.actionName, lastStageId, product.priority,
-                                    new HashMap<Integer, List<String>>(), getLocalName(), "dummyID");
+                                    new HashMap<Integer, List<String>>(), getLocalName(), "dummyID", -1);
                             ic.machines.values().forEach(machine -> {
                                 machine.actions.forEach(machineAction -> {
                                     if(machineAction.productName.equals(product.name)
