@@ -49,6 +49,7 @@ public class InformationCenter {
     public void addBreakdown(Breakdown br)
     {
         breakdowns.add(br);
+        machines.get(br.MachineId).breakdown = br;
         System.out.println("Breakdown added");
     }
 }

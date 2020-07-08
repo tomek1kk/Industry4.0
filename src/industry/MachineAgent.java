@@ -10,6 +10,7 @@ import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
+import javax.swing.*;
 import java.sql.Time;
 import java.util.*;
 
@@ -111,7 +112,7 @@ public class MachineAgent extends Agent {
     }
 
     private void ReturnOffer(String id, Long productionEnd, String receiver) {
-        OfferMessage content = new OfferMessage(productionEnd);
+        OfferMessage content = machine.active? new OfferMessage(productionEnd) :  new OfferMessage(-1);
         ACLMessage msg = new ACLMessage();
         msg.setContent(parser.toJson(content));
         AID AIDreceiver = new AID(receiver, AID.ISLOCALNAME);

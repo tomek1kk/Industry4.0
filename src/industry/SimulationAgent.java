@@ -138,6 +138,8 @@ public class SimulationAgent extends Agent {
                 long bestTime = Long.MAX_VALUE;
                 int bestIdx = 0;
                 for (int i = 0; i < PlanMap.get(productId).size(); i++){
+                    if(PlanMap.get(productId).get(i)._productionEnd == -1) //when machine is broke
+                        continue;
                     if(PlanMap.get(productId).get(i)._productionEnd < bestTime){
                         bestIdx = i;
                         bestTime = PlanMap.get(productId).get(i)._productionEnd;

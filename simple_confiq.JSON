@@ -188,6 +188,7 @@
          "breakdowns":[
             {
                "machineId":1,
+               "breakTime":10000,
                "duration":1800
             }
          ]
