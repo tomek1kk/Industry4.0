@@ -14,7 +14,7 @@
       },
       {
          "machineId":2,
-         "socketId":1,
+         "socketId":7,
          "actions":[
             {
                "productName":"hooded",
@@ -56,7 +56,7 @@
       },
       {
          "machineId":4,
-         "socketId":2,
+         "socketId":3,
          "actions":[
             {
                "productName":"t-shirt",
@@ -74,7 +74,7 @@
       },
       {
          "machineId":5,
-         "socketId":2,
+         "socketId":4,
          "actions":[
             {
                "productName":"hooded",
@@ -92,7 +92,7 @@
       },
       {
          "machineId":6,
-         "socketId":2,
+         "socketId":5,
          "actions":[
             {
                "productName":"sticker",
@@ -267,5 +267,5 @@
          ]
       }
    ],
-   "socketDelay":1000
+   "socketDelay":55
 }
