@@ -14,7 +14,7 @@
       },
       {
          "machineId":2,
-         "socketId":7,
+         "socketId":1,
          "actions":[
             {
                "productName":"hooded",
@@ -56,7 +56,7 @@
       },
       {
          "machineId":4,
-         "socketId":3,
+         "socketId":2,
          "actions":[
             {
                "productName":"t-shirt",
@@ -74,7 +74,7 @@
       },
       {
          "machineId":5,
-         "socketId":4,
+         "socketId":2,
          "actions":[
             {
                "productName":"hooded",
@@ -90,42 +90,18 @@
             }
          ]
       },
-    {
-      "machineId": 6,
-      "socketId": 5,
-      "actions": [
-        {
-          "productName": "sticker",
-          "stageId": 1,
-          "actionName": "make sticker",
-          "productionTime": 3000
-        }
-      ]
-    },
-    {
-      "machineId": 7,
-      "socketId": 5,
-      "actions": [
-        {
-          "productName": "hooded",
-          "stageId": 4,
-          "actionName": "add printing",
-          "productionTime": 3000
-        }
-      ]
-    },
-    {
-      "machineId": 8,
-      "socketId": 5,
-      "actions": [
-        {
-          "productName": "hooded",
-          "stageId": 4,
-          "actionName": "add printing",
-          "productionTime": 3000
-        }
-      ]
-    }
+      {
+         "machineId":6,
+         "socketId":2,
+         "actions":[
+            {
+               "productName":"sticker",
+               "stageId":1,
+               "actionName":"make sticker",
+               "productionTime":3000
+            }
+         ]
+      }
    ],
    "products":[
       {
@@ -291,5 +267,5 @@
          ]
       }
    ],
-   "socketDelay":55
+   "socketDelay":1000
 }

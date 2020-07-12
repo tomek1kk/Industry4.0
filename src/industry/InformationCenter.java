@@ -10,7 +10,6 @@ public class InformationCenter {
     public ArrayList<Simulation> simulations;
     public int socketDelay;
     public ArrayList<Breakdown> breakdowns;
-    public GUIFrame guiFrame;
 
     private static InformationCenter instance;
 
@@ -52,9 +51,5 @@ public class InformationCenter {
         breakdowns.add(br);
         machines.get(br.MachineId).breakdown = br;
         System.out.println("Breakdown added");
-    }
-    public void addGUIFrame(GUIFrame gui)
-    {
-        guiFrame = gui;
     }
 }
