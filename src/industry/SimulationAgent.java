@@ -169,9 +169,12 @@ public class SimulationAgent extends Agent {
                 MessageTemplate mt = MessageTemplate.MatchProtocol("product" + id);
                 ACLMessage rcv = receive(mt);
                 if (rcv != null) {
-                    String productName = PlanMap.get(productId).get(0)._messageContent.GetProductName();
+                    PlanMessage mes = PlanMap.get(productId).get(0)._messageContent;
+                    String productName = mes.GetProductName();
                     DoneProducts.add(new DoneProduct(productName, productId, id));
+                    //ic.guiFrame.removeProduct(mes.getRequestingAgent(), productName);
                     System.out.println("Got finished product: " + productName + ". Finished products: " + DoneProducts.size());
+                    ic.guiFrame.addFinishedProduct(productName);
                     finished = true;
                 } else
                     block();

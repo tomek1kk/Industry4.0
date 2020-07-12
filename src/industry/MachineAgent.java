@@ -449,6 +449,7 @@ public class MachineAgent extends Agent {
             }
             if(currProdElement != null){
                 MachineAction action = FindAction(currProdElement._planMessage);
+                InformationCenter.getInstance().guiFrame.addProduct(getLocalName(), action.productName);
                 System.out.println(getLocalName() + " started produce " + action.productName
                     + ". Product will be ready in " + action.productionTime + " ms");
                 reset(action.productionTime);
@@ -461,6 +462,8 @@ public class MachineAgent extends Agent {
             public void onWake() {
                 ACLMessage msg = new ACLMessage();
                 msg.addReceiver(new AID(product._planMessage.getRequestingAgent(), AID.ISLOCALNAME));
+                //if (product._planMessage.getRequestingAgent().equals("SimulationAgent"))
+                InformationCenter.getInstance().guiFrame.removeProduct(getLocalName(), product._planMessage.GetProductName());
                 msg.setProtocol("product"+product._planMessage.getId());
                 send(msg);
             }

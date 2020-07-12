@@ -13,6 +13,7 @@ import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 
+import java.awt.*;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class ManagerAgent extends Agent {
@@ -185,6 +187,20 @@ public class ManagerAgent extends Agent {
                 });
             }
         };
+
+        Behaviour initGUI = new WakerBehaviour(this, 3000) {
+            @Override
+            protected void onWake() {
+                System.out.println("Start gui...");
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        ic.addGUIFrame(new GUIFrame(machineAgents));
+                    }
+                });
+            }
+        };
+
         Behaviour startSimulation = new WakerBehaviour(this, 4000) {
             @Override
             protected void onWake() {
@@ -195,6 +211,7 @@ public class ManagerAgent extends Agent {
         ic = InformationCenter.getInstance();
         addBehaviour(readConfiguration);
         addBehaviour(generateMachines);
+        addBehaviour(initGUI);
         addBehaviour(startSimulation);
 
     }
