@@ -38,6 +38,8 @@ public class SimulationAgent extends Agent {
             @Override
             protected void onTick() {
                 Simulation currentSimulation = ic.simulations.get(step);
+                ic.guiFrame.setSimulationStep(step);
+
                 for(int j = 0; j < currentSimulation.demandedProducts.size(); j++){
                     Integer lastStageId = Collections.max(ic.products.get(currentSimulation.demandedProducts.get(j).name).stages.keySet());
                     final DemandedProduct product = currentSimulation.demandedProducts.get(j);
@@ -66,8 +68,9 @@ public class SimulationAgent extends Agent {
                         PlanMap.put(productId, PlanList);
                         addBehaviour(PlanBehaviour(productId));
                     }
-                };
+                }
                 step++;
+
                 if(ic.simulations.size() > step){
                     reset(currentSimulation.duration);
                 } else {
@@ -168,9 +171,11 @@ public class SimulationAgent extends Agent {
                 MessageTemplate mt = MessageTemplate.MatchProtocol("product" + id);
                 ACLMessage rcv = receive(mt);
                 if (rcv != null) {
-                    String productName = PlanMap.get(productId).get(0)._messageContent.GetProductName();
+                    PlanMessage mes = PlanMap.get(productId).get(0)._messageContent;
+                    String productName = mes.GetProductName();
                     DoneProducts.add(new DoneProduct(productName, productId, id));
                     System.out.println("Got finished product: " + productName + ". Finished products: " + DoneProducts.size());
+                    ic.guiFrame.addFinishedProduct(productName);
                     finished = true;
                 } else
                     block();
