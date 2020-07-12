@@ -44,8 +44,9 @@ public class GUIFrame extends JFrame {
         JPanel panel = machinePanels.get(machineRef);
         JLabel label = new JLabel(product, SwingConstants.CENTER);
         panel.add(label);
+        panel.revalidate();
+        panel.repaint();
         labels.get(panel).add(label);
-        //setVisible(true);
     }
 
     public void removeProduct(String machine, String product) {
@@ -55,8 +56,7 @@ public class GUIFrame extends JFrame {
         panel.remove(label);
         labels.get(panel).remove(label);
         panel.revalidate();
-        panel.repaint(); // sometimes needed
-        //setVisible(true);
+        panel.repaint();
     }
 
     public void addFinishedProduct(String product) {
