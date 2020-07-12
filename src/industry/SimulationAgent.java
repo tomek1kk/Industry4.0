@@ -10,7 +10,6 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import java.util.*;
 
-
 public class SimulationAgent extends Agent {
     Gson parser = new Gson();
     InformationCenter ic;

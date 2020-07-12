@@ -43,12 +43,14 @@ public class ManagerAgent extends Agent {
         ic.addMachine(m);
     }
 
-    protected void parseBreakDownObject(JsonObject breakdown, InformationCenter ic) {
+    protected Breakdown parseBreakDownObject(JsonObject breakdown, InformationCenter ic) {
         int machineId = breakdown.get("machineId").getAsInt();
         int breakTime = breakdown.get("breakTime").getAsInt();
         int duration = breakdown.get("duration").getAsInt();
 
-        ic.addBreakdown(new Breakdown(machineId, breakTime, duration));
+        var br = new Breakdown(machineId, breakTime, duration);
+        ic.addBreakdown(br);
+        return br;
     }
 
     protected void parseProductObject(JsonObject product, InformationCenter ic) {
@@ -166,10 +168,24 @@ public class ManagerAgent extends Agent {
 
                         int delay = jsonObject.get("socketDelay").getAsInt();
                         ic.addSocketDelay(delay);
-                        System.out.println("delay kurde: " + delay);
                   
                         JsonArray breakdowns = jsonObject.get("breakdowns").getAsJsonArray();
-                        simulations.forEach(b -> parseBreakDownObject(b.getAsJsonObject(), ic));
+
+                        for(var b :breakdowns)
+                        {
+                            var br = parseBreakDownObject(b.getAsJsonObject(), ic);
+                            ContainerController cc = getContainerController();
+                            for( var pr : ic.machines.get(br.MachineId).actions) {
+                                try {
+                                    Object[] args = new Object[1];
+                                    args[0] = new BreakdownArgs(pr.productName, pr.stageId);
+                                    AgentController ac = cc.createNewAgent("BreakdownAgent_" + br.MachineId, "industry.BreakDownAgent", args);
+                                    ac.start();
+                                } catch (StaleProxyException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
 
                         reader.close();
                     }
