@@ -173,10 +173,9 @@ public class ManagerAgent extends Agent {
 
                         int delay = jsonObject.get("socketDelay").getAsInt();
                         ic.addSocketDelay(delay);
-                        System.out.println("delay kurde: " + delay);
                   
-                        JsonArray breakdowns = jsonObject.get("breakdowns").getAsJsonArray();
-                        simulations.forEach(b -> parseBreakDownObject(b.getAsJsonObject(), ic));
+                        JsonArray breakdowns = jsonObject.get("breakdown").getAsJsonArray();
+                        breakdowns.forEach(b -> parseBreakDownObject(b.getAsJsonObject(), ic));
 
                         reader.close();
                     }

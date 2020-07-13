@@ -6,10 +6,14 @@ import jade.core.Agent;
 import jade.core.behaviours.*;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import jade.wrapper.AgentController;
+import jade.wrapper.ContainerController;
+import jade.wrapper.StaleProxyException;
 
 import javax.swing.*;
 import java.sql.Time;
 import java.util.*;
+import java.util.Timer;
 
 public class MachineAgent extends Agent {
     Machine machine;
@@ -18,6 +22,7 @@ public class MachineAgent extends Agent {
     HashMap<String, Product> productsDefinitions;
     Gson parser = new Gson();
     int lastGenerated = 0;
+    Boolean recievedAllComponents = false;
     Map<String, Map<String, List<PlanElement>>> PlanMap = new HashMap<String, Map<String, List<PlanElement>>>();
     List<List<ProduceElement>> ProduceList = new LinkedList<List<ProduceElement>>();
     ProduceElement currProdElement;
@@ -57,6 +62,9 @@ public class MachineAgent extends Agent {
         addBehaviour(initMachine);
         addBehaviour(GetPlan());
         addBehaviour(GetAcceptOffer());
+        addBehaviour(HandleBreakDown);
+        addBehaviour(HandleBreakdownReplacement);
+        addBehaviour(GetReplacementAsk);
     }
     private void InitProductionList(){
         for(int i = 0; i < 10; i++){
@@ -202,6 +210,7 @@ public class MachineAgent extends Agent {
     }
 
     private void AcceptOffer(String productId, PlanElement planElem){
+        machine.state = MachineState.busy;
         addBehaviour(GetProduct(productId, planElem._messageContent.getId()));
         ACLMessage msg = new ACLMessage();
         msg.addReceiver(planElem._receiver);
@@ -432,29 +441,32 @@ public class MachineAgent extends Agent {
     Behaviour Produce = new TickerBehaviour(this, 500) {
         @Override
         public void onTick() {
-            if(currProdElement != null){
-                String req = currProdElement._planMessage.getRequestingAgent();
-                int delay = GetSocketDelay(req);
-                addBehaviour(SendProduct(currProdElement, delay));
-                currProdElement = null;
-            }
-            for(int i = 9; i >= 0; i--){
-                for(int j = 0; j < ProduceList.get(i).size(); j++) {
-                    if (ProduceList.get(i).get(j)._readyToProduce) {
-                        currProdElement = ProduceList.get(i).get(j);
-                        ProduceList.get(i).remove(j);
-                        break;
-                    }
+            recievedAllComponents = true;
+            if (machine.active) {
+                if (currProdElement != null) {
+                    String req = currProdElement._planMessage.getRequestingAgent();
+                    int delay = GetSocketDelay(req);
+                    addBehaviour(SendProduct(currProdElement, delay));
+                    currProdElement = null;
                 }
-                if(currProdElement != null)
-                    break;
-            }
-            if(currProdElement != null){
-                MachineAction action = FindAction(currProdElement._planMessage);
-                InformationCenter.getInstance().guiFrame.addProduct(getLocalName(), action.productName);
-                System.out.println(getLocalName() + " started produce " + action.productName
-                    + ". Product will be ready in " + action.productionTime + " ms");
-                reset(action.productionTime);
+                for (int i = 9; i >= 0; i--) {
+                    for (int j = 0; j < ProduceList.get(i).size(); j++) {
+                        if (ProduceList.get(i).get(j)._readyToProduce) {
+                            currProdElement = ProduceList.get(i).get(j);
+                            ProduceList.get(i).remove(j);
+                            break;
+                        }
+                    }
+                    if (currProdElement != null)
+                        break;
+                }
+                if (currProdElement != null) {
+                    MachineAction action = FindAction(currProdElement._planMessage);
+                    InformationCenter.getInstance().guiFrame.addProduct(getLocalName(), action.productName);
+                    System.out.println(getLocalName() + " started produce " + action.productName
+                            + ". Product will be ready in " + action.productionTime + " ms");
+                    reset(action.productionTime);
+                }
             }
         }
     };
@@ -462,12 +474,14 @@ public class MachineAgent extends Agent {
         return new WakerBehaviour(this, delay) {
             @Override
             public void onWake() {
-                ACLMessage msg = new ACLMessage();
-                msg.addReceiver(new AID(product._planMessage.getRequestingAgent(), AID.ISLOCALNAME));
-                //if (product._planMessage.getRequestingAgent().equals("SimulationAgent"))
-                InformationCenter.getInstance().guiFrame.removeProduct(getLocalName(), product._planMessage.GetProductName());
-                msg.setProtocol("product"+product._planMessage.getId());
-                send(msg);
+                if (machine.active) {
+                    ACLMessage msg = new ACLMessage();
+                    msg.addReceiver(new AID(product._planMessage.getRequestingAgent(), AID.ISLOCALNAME));
+                    //if (product._planMessage.getRequestingAgent().equals("SimulationAgent"))
+                    InformationCenter.getInstance().guiFrame.removeProduct(getLocalName(), product._planMessage.GetProductName());
+                    msg.setProtocol("product" + product._planMessage.getId());
+                    send(msg);
+                }
             }
         };
     }
@@ -514,4 +528,98 @@ public class MachineAgent extends Agent {
             }
         }
     }
+
+    OneShotBehaviour HandleBreakDown = new OneShotBehaviour() {
+        @Override
+        public void action() {
+            if (machine.breakdown != null) {
+                Timer workTimer = new Timer();
+                workTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        machine.active = false;
+                        System.out.println(machine.machineId + " MACHINE IS BROKE");
+//                        if (currProdElement!= null)
+//                        {
+//                            InformationCenter.getInstance().guiFrame.removeProduct(getLocalName(), currProdElement._planMessage.GetProductName());
+//                        }
+                    }
+                }, machine.breakdown.breakTime);
+
+                Timer breakdownTimer = new Timer();
+                breakdownTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        machine.active = true;
+                        System.out.println(machine.machineId + " MACHINE IS WORKING AGAIN");
+                        machine.breakdown = null;
+                    }
+                }, machine.breakdown.breakTime + machine.breakdown.durationOfBreak);
+            }
+        }
+    };
+
+    TickerBehaviour HandleBreakdownReplacement = new TickerBehaviour(this, 500) {
+        @Override
+        protected void onTick() {
+            if (!machine.active && recievedAllComponents) {
+                recievedAllComponents = true;
+                if (machine.active) {
+                    for (int i = 9; i >= 0; i--) { // priority of actions
+                        for (int j = 0; j < ProduceList.get(i).size(); j++) {
+                            if (ProduceList.get(i).get(j)._readyToProduce) {
+                                currProdElement = ProduceList.get(i).get(j);
+                                ProduceList.get(i).remove(j);
+                                break;
+                            }
+                        }
+                        if (currProdElement != null)
+                            break;
+                    }
+                    if (currProdElement != null) {
+                        try {
+                            ContainerController cc = getContainerController();
+                            Object[] args = new Object[1];
+                            args[0] = new BreakdownArgs(currProdElement._planMessage.GetProductName(), currProdElement._planMessage.GetStageId());
+                            AgentController ac = cc.createNewAgent("BreakdownAgent_" + machine.machineId, "industry.BreakDownAgent", args);
+                            ac.start();
+                            currProdElement = null;
+                        } catch (StaleProxyException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    SimpleBehaviour GetReplacementAsk = new SimpleBehaviour(){
+        @Override
+        public void action() {
+            MessageTemplate mt = MessageTemplate.MatchProtocol("replacementAsk");
+            ACLMessage rcv = receive(mt);
+            if (rcv != null) {
+                System.out.println("REPLACEMENT");
+//                    replacementAskMessage message = parser.fromJson(rcv.getContent(), replacementAskMessage);
+//                    ProduceList = message.prod;
+//                    for (int i = 9; i >= 0; i--) { // priority of actions
+//                        for (int j = 0; j < ProduceList.get(i).size(); j++) {
+//                            if (ProduceList.get(i).get(j)._readyToProduce) {
+//                                currProdElement = ProduceList.get(i).get(j);
+//                                ProduceList.get(i).remove(j);
+//                                    System.out.println(getLocalName() + " started produce " + action.productName
+//                                        + ". Product will be ready in " + action.productionTime + " ms");
+//                                break;
+//                            }
+//                        }
+//                    }
+            } else
+                block();
+        }
+
+        @Override
+        public boolean done() {
+            return false;
+        }
+    };
 }
