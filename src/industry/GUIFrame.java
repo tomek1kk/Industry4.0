@@ -40,16 +40,16 @@ public class GUIFrame extends JFrame {
         finishedProducts.add(new JLabel("Finished products: ", SwingConstants.CENTER));
         finishedProducts.setLocation(0, 400);
 
-        ic.products.values().forEach(value -> {
-            ordered.put(value.name, 0);
-            produced.put(value.name, 0);
-            orderedLabel.put(value.name, new JLabel("0", SwingConstants.CENTER));
-            producedLabel.put(value.name, new JLabel("0", SwingConstants.CENTER));
-            finishedProducts.add(new JLabel(value.name + " ", SwingConstants.CENTER));
-            finishedProducts.add(producedLabel.get(value.name));
-            finishedProducts.add(new JLabel("/", SwingConstants.CENTER));
-            finishedProducts.add(orderedLabel.get(value.name));
-        });
+//        ic.products.values().forEach(value -> {
+//            ordered.put(value.name, 0);
+//            produced.put(value.name, 0);
+//            orderedLabel.put(value.name, new JLabel("0", SwingConstants.CENTER));
+//            producedLabel.put(value.name, new JLabel("0", SwingConstants.CENTER));
+//            finishedProducts.add(new JLabel(value.name + " ", SwingConstants.CENTER));
+//            finishedProducts.add(producedLabel.get(value.name));
+//            finishedProducts.add(new JLabel("/", SwingConstants.CENTER));
+//            finishedProducts.add(orderedLabel.get(value.name));
+//        });
 
         add(finishedProducts);
         add(mainPanel);
@@ -87,6 +87,16 @@ public class GUIFrame extends JFrame {
         Simulation simulation = ic.simulations.get(step);
         for (int i = 0; i < simulation.demandedProducts.size(); i++) {
             DemandedProduct product = simulation.demandedProducts.get(i);
+            if (!ordered.containsKey(product.name)) {
+                ordered.put(product.name, 0);
+                produced.put(product.name, 0);
+                orderedLabel.put(product.name, new JLabel("0", SwingConstants.CENTER));
+                producedLabel.put(product.name, new JLabel("0", SwingConstants.CENTER));
+                finishedProducts.add(new JLabel(product.name + " ", SwingConstants.CENTER));
+                finishedProducts.add(producedLabel.get(product.name));
+                finishedProducts.add(new JLabel("/", SwingConstants.CENTER));
+                finishedProducts.add(orderedLabel.get(product.name));
+            }
             int prevValue = ordered.get(product.name);
             ordered.replace(product.name, prevValue, prevValue + product.amount);
             orderedLabel.get(product.name).setText(ordered.get(product.name).toString());
