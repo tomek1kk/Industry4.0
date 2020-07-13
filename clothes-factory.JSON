@@ -125,7 +125,25 @@
           "productionTime": 3000
         }
       ]
-    }
+    },
+	{
+         "machineId":9,
+         "socketId":4,
+         "actions":[
+            {
+               "productName":"hooded",
+               "stageId":3,
+               "actionName":"add hood",
+               "productionTime":10000
+            },
+            {
+               "productName":"hooded",
+               "stageId":4,
+               "actionName":"add printing",
+               "productionTime":12000
+            }
+         ]
+      }
    ],
    "products":[
       {

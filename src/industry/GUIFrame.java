@@ -40,17 +40,6 @@ public class GUIFrame extends JFrame {
         finishedProducts.add(new JLabel("Finished products: ", SwingConstants.CENTER));
         finishedProducts.setLocation(0, 400);
 
-//        ic.products.values().forEach(value -> {
-//            ordered.put(value.name, 0);
-//            produced.put(value.name, 0);
-//            orderedLabel.put(value.name, new JLabel("0", SwingConstants.CENTER));
-//            producedLabel.put(value.name, new JLabel("0", SwingConstants.CENTER));
-//            finishedProducts.add(new JLabel(value.name + " ", SwingConstants.CENTER));
-//            finishedProducts.add(producedLabel.get(value.name));
-//            finishedProducts.add(new JLabel("/", SwingConstants.CENTER));
-//            finishedProducts.add(orderedLabel.get(value.name));
-//        });
-
         add(finishedProducts);
         add(mainPanel);
 
@@ -102,6 +91,26 @@ public class GUIFrame extends JFrame {
             orderedLabel.get(product.name).setText(ordered.get(product.name).toString());
 
         }
+    }
+
+    public void breakMachine(String machine) {
+        MachineReference machineRef = machines.stream().filter(m -> m.name.equals(machine)).findFirst().get();
+        JPanel panel = machinePanels.get(machineRef);
+        JLabel label = new JLabel("BROKEN", SwingConstants.CENTER);
+        panel.add(label);
+        panel.revalidate();
+        panel.repaint();
+        labels.get(panel).add(label);
+    }
+
+    public void resumeMachine(String machine) {
+        MachineReference machineRef = machines.stream().filter(m -> m.name.equals(machine)).findFirst().get();
+        JPanel panel = machinePanels.get(machineRef);
+        JLabel label = labels.get(panel).stream().filter(l -> l.getText().equals("BROKEN")).findFirst().get();
+        panel.remove(label);
+        labels.get(panel).remove(label);
+        panel.revalidate();
+        panel.repaint();
     }
 
 }

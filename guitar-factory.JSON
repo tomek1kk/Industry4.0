@@ -488,5 +488,12 @@
        ]
      }
    ],
+  "breakdown": [
+    {
+      "machineId" : 1,
+      "breakTime" : 10000,
+      "duration" : 12000
+    }
+   ],
    "socketDelay":500
 }

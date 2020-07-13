@@ -539,10 +539,7 @@ public class MachineAgent extends Agent {
                     public void run() {
                         machine.active = false;
                         System.out.println(machine.machineId + " MACHINE IS BROKE");
-//                        if (currProdElement!= null)
-//                        {
-//                            InformationCenter.getInstance().guiFrame.removeProduct(getLocalName(), currProdElement._planMessage.GetProductName());
-//                        }
+                        InformationCenter.getInstance().guiFrame.breakMachine(getLocalName());
                     }
                 }, machine.breakdown.breakTime);
 
@@ -552,6 +549,7 @@ public class MachineAgent extends Agent {
                     public void run() {
                         machine.active = true;
                         System.out.println(machine.machineId + " MACHINE IS WORKING AGAIN");
+                        InformationCenter.getInstance().guiFrame.resumeMachine(getLocalName());
                         machine.breakdown = null;
                     }
                 }, machine.breakdown.breakTime + machine.breakdown.durationOfBreak);
