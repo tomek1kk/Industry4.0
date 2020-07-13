@@ -104,4 +104,24 @@ public class GUIFrame extends JFrame {
         }
     }
 
+    public void breakMachine(String machine) {
+        MachineReference machineRef = machines.stream().filter(m -> m.name.equals(machine)).findFirst().get();
+        JPanel panel = machinePanels.get(machineRef);
+        JLabel label = new JLabel("BROKEN", SwingConstants.CENTER);
+        panel.add(label);
+        panel.revalidate();
+        panel.repaint();
+        labels.get(panel).add(label);
+    }
+
+    public void resumeMachine(String machine) {
+        MachineReference machineRef = machines.stream().filter(m -> m.name.equals(machine)).findFirst().get();
+        JPanel panel = machinePanels.get(machineRef);
+        JLabel label = labels.get(panel).stream().filter(l -> l.getText().equals("BROKEN")).findFirst().get();
+        panel.remove(label);
+        labels.get(panel).remove(label);
+        panel.revalidate();
+        panel.repaint();
+    }
+
 }
