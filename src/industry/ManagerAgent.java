@@ -158,7 +158,7 @@ public class ManagerAgent extends Agent {
                 Reader reader = null;
                 JsonParser parser = new JsonParser();
                 try {
-                        reader = Files.newBufferedReader(Paths.get("clothes-factory.JSON"));
+                        reader = Files.newBufferedReader(Paths.get("guitar-factory.JSON"));
                         JsonElement jsonTree = parser.parse(reader);
                         JsonObject jsonObject = jsonTree.getAsJsonObject();
 

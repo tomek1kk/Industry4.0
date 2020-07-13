@@ -412,14 +412,16 @@ public class MachineAgent extends Agent {
                 }
                 long lastSubproductTime = Collections.max(offersTimes.values());
                 for(int i = 0; i < keys.length; i++){
-                    PlanMap.get(productId).get(keys[i]).get(offersIdx.get(keys[i]))._bestOffer = true;
-                    PlanMap.get(productId).get(keys[i]).get(offersIdx.get(keys[i]))._lastPlanSubproductTime = lastSubproductTime;
+                    if (PlanMap.get(productId).get(keys[i]).size() > 0){
+                        PlanMap.get(productId).get(keys[i]).get(offersIdx.get(keys[i]))._bestOffer = true;
+                        PlanMap.get(productId).get(keys[i]).get(offersIdx.get(keys[i]))._lastPlanSubproductTime = lastSubproductTime;
+                    }
                 }
-                PlanMessage productPlan = PlanMap.get(productId).get(keys[0]).get(0)._upperMessageContent;
-                long finalProductionEnd = GetFinalProductionEnd(productPlan.getPriority(),
-                        FindAction(productPlan.GetActionName(), productPlan.GetStageId(), productPlan.GetProductName()).productionTime, offersTimes.values());
-                ReturnOffer(productId, finalProductionEnd, PlanMap.get(productId).get(keys[0]).get(0)._requestingAgent.getLocalName());
-                finished = true;
+                    PlanMessage productPlan = PlanMap.get(productId).get(keys[0]).get(0)._upperMessageContent;
+                    long finalProductionEnd = GetFinalProductionEnd(productPlan.getPriority(),
+                            FindAction(productPlan.GetActionName(), productPlan.GetStageId(), productPlan.GetProductName()).productionTime, offersTimes.values());
+                    ReturnOffer(productId, finalProductionEnd, PlanMap.get(productId).get(keys[0]).get(0)._requestingAgent.getLocalName());
+                    finished = true;
             }
             @Override
             public boolean done() {

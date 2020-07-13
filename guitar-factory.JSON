@@ -1,0 +1,472 @@
+{
+  "machines": [
+    {
+      "machineId": 1,
+      "socketId": 1,
+      "actions": [
+        {
+          "productName": "classic guitar",
+          "stageId": 2,
+          "actionName": "painting",
+          "productionTime": 2000
+        },
+        {
+          "productName": "acustic guitar",
+          "stageId": 4,
+          "actionName": "add strings",
+          "productionTime": 2000
+        }
+      ]
+    },
+    {
+      "machineId": 2,
+      "socketId": 1,
+      "actions": [
+        {
+          "productName": "classic guitar",
+          "stageId": 2,
+          "actionName": "painting",
+          "productionTime": 1000
+        },
+        {
+          "productName": "acustic guitar",
+          "stageId": 4,
+          "actionName": "add strings",
+          "productionTime": 3000
+        }
+      ]
+    },
+    {
+      "machineId": 3,
+      "socketId": 1,
+      "actions": [
+        {
+          "productName": "classic guitar",
+          "stageId": 1,
+          "actionName": "classic assembly",
+          "productionTime": 7000
+        },
+        {
+          "productName": "acustic guitar",
+          "stageId": 3,
+          "actionName": "acustic assembly",
+          "productionTime": 4000
+        }
+      ]
+    },
+    {
+      "machineId": 4,
+      "socketId": 2,
+      "actions": [
+        {
+          "productName": "acustic guitar",
+          "stageId": 2,
+          "actionName": "make sound hole",
+          "productionTime": 2000
+        },
+        {
+          "productName": "acustic guitar",
+          "stageId": 1,
+          "actionName": "cut template",
+          "productionTime": 2500
+        }
+      ]
+    },
+    {
+      "machineId": 5,
+      "socketId": 2,
+      "actions": [
+        {
+          "productName": "acustic guitar",
+          "stageId": 2,
+          "actionName": "make sound hole",
+          "productionTime": 3000
+        },
+        {
+          "productName": "acustic guitar",
+          "stageId": 1,
+          "actionName": "cut template",
+          "productionTime": 500
+        }
+      ]
+    },
+    {
+      "machineId": 6,
+      "socketId": 3,
+      "actions": [
+        {
+          "productName": "electric guitar",
+          "stageId": 1,
+          "actionName": "make electric template",
+          "productionTime": 8000
+        },
+        {
+          "productName": "electric guitar",
+          "stageId": 2,
+          "actionName": "add inner mechanics",
+          "productionTime": 5000
+        }
+      ]
+    },
+    {
+      "machineId": 7,
+      "socketId": 3,
+      "actions": [
+        {
+          "productName": "electric guitar",
+          "stageId": 1,
+          "actionName": "make electric template",
+          "productionTime": 4000
+        }
+      ]
+    },
+    {
+      "machineId": 8,
+      "socketId": 3,
+      "actions": [
+        {
+          "productName": "electric guitar",
+          "stageId": 2,
+          "actionName": "add inner mechanics",
+          "productionTime": 2000
+        }
+      ]
+    },
+    {
+      "machineId": 9,
+      "socketId": 4,
+      "actions": [
+        {
+          "productName": "classic body",
+          "stageId": 1,
+          "actionName": "make classic body",
+          "productionTime": 1000
+        },
+        {
+          "productName": "acustic body",
+          "stageId": 1,
+          "actionName": "make acustic body",
+          "productionTime": 1000
+        }
+      ]
+    },
+    {
+      "machineId": 9,
+      "socketId": 4,
+      "actions": [
+        {
+          "productName": "board",
+          "stageId": 1,
+          "actionName": "produce board",
+          "productionTime": 1000
+        },
+        {
+          "productName": "neck",
+          "stageId": 1,
+          "actionName": "produce neck",
+          "productionTime": 1000
+        }
+      ]
+    },
+    {
+      "machineId": 10,
+      "socketId": 4,
+      "actions": [
+        {
+          "productName": "board",
+          "stageId": 1,
+          "actionName": "produce board",
+          "productionTime": 1000
+        },
+        {
+          "productName": "neck",
+          "stageId": 1,
+          "actionName": "produce neck",
+          "productionTime": 1000
+        }
+      ]
+    },
+    {
+      "machineId": 11,
+      "socketId": 4,
+      "actions": [
+        {
+          "productName": "string",
+          "stageId": 1,
+          "actionName": "produce string",
+          "productionTime": 500
+        }
+      ]
+    },
+    {
+      "machineId": 12,
+      "socketId": 5,
+      "actions": [
+        {
+          "productName": "electric body",
+          "stageId": 1,
+          "actionName": "embedded system",
+          "productionTime": 5000
+        },
+        {
+          "productName": "electric body",
+          "stageId": 2,
+          "actionName": "electric strings",
+          "productionTime": 1000
+        }
+      ]
+    },
+    {
+      "machineId": 13,
+      "socketId": 5,
+      "actions": [
+        {
+          "productName": "electric guitar",
+          "stageId": 3,
+          "actionName": "main electric assembly",
+          "productionTime": 5000
+        }
+      ]
+    }
+  ],
+   "products":[
+      {
+         "name":"classic guitar",
+         "stages":[
+            {
+			   "stageId":2,
+               "actions":[
+                  {
+                     "actionName":"painting",
+                     "subproducts":[
+                     ]
+                  }
+               ]
+			},
+			{
+			   "stageId":1,
+               "actions":[
+                  {
+                     "actionName":"classic assembly",
+                     "subproducts":[
+						           "string", "neck"
+                     ]
+                  }
+               ]
+			}
+         ]
+      },
+      {
+         "name":"acustic guitar",
+         "stages":[
+		    {
+               "stageId":4,
+               "actions":[
+                  {
+                     "actionName":"add strings",
+                     "subproducts":[
+                        "string"
+                     ]
+                  }
+               ]
+            },
+            {
+               "stageId":3,
+               "actions":[
+                  {
+                     "actionName":"acustic assembly",
+                     "subproducts":[
+                        "neck"
+                     ]
+                  }
+               ]
+            },
+            {
+               "stageId":2,
+               "actions":[
+                  {
+                     "actionName":"make sound hole",
+                     "subproducts":[
+                     ]
+                  }
+               ]
+            },
+            {
+               "stageId":1,
+               "actions":[
+                  {
+                     "actionName":"cut template",
+                     "subproducts":[
+                     ]
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name":"electric guitar",
+         "stages":[
+            {
+               "stageId":1,
+               "actions":[
+                  {
+                     "actionName":"make electric template",
+                     "subproducts":[
+                     ]
+                  }
+               ]
+            },
+            {
+               "stageId":2,
+               "actions":[
+                  {
+                     "actionName":"add inner mechanics",
+                     "subproducts":[
+						"electric body"
+                     ]
+                  }
+               ]
+            },
+			{
+               "stageId":3,
+               "actions":[
+                  {
+                     "actionName":"main electric assembly",
+                     "subproducts":[
+						"string", "neck"
+                     ]
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name":"string",
+         "stages":[
+            {
+               "stageId":1,
+               "actions":[
+                  {
+                     "actionName":"produce string",
+                     "subproducts":[
+
+                     ]
+                  }
+               ]
+            }
+         ]
+      },
+	  {
+         "name":"neck",
+         "stages":[
+            {
+               "stageId":1,
+               "actions":[
+                  {
+                     "actionName":"produce neck",
+                     "subproducts":[
+						"board"
+                     ]
+                  }
+               ]
+            }
+         ]
+      },
+	  {
+         "name":"board",
+         "stages":[
+            {
+               "stageId":1,
+               "actions":[
+                  {
+                     "actionName":"produce board",
+                     "subproducts":[
+                     ]
+                  }
+               ]
+            }
+         ]
+      },
+	  {
+         "name":"electric body",
+         "stages":[
+            {
+               "stageId":2,
+               "actions":[
+                  {
+                     "actionName":"electric strings",
+                     "subproducts":[
+						"string"
+                     ]
+                  }
+               ]
+            },
+			{
+               "stageId":1,
+               "actions":[
+                  {
+                     "actionName":"embedded system",
+                     "subproducts":[
+                     ]
+                  }
+               ]
+            }
+         ]
+      },
+	  {
+         "name":"acustic body",
+         "stages":[
+            {
+               "stageId":1,
+               "actions":[
+                  {
+                     "actionName":"make acustic body",
+                     "subproducts":[
+						"board"
+                     ]
+                  }
+               ]
+            }
+         ]
+      },
+	  {
+         "name":"classic body",
+         "stages":[
+            {
+               "stageId":1,
+               "actions":[
+                  {
+                     "actionName":"make classic body",
+                     "subproducts":[
+						"board"
+                     ]
+                  }
+               ]
+            }
+         ]
+      }
+   ],
+   "simulation":[
+      {
+         "duration":100000,
+        "demandedProducts": [
+          {
+            "name": "acustic guitar",
+            "amount": 5,
+            "priority": 2
+          },
+          {
+            "name": "electric guitar",
+            "amount": 5,
+            "priority": 4
+          },
+          {
+            "name": "classic guitar",
+            "amount": 5,
+            "priority": 4
+          }
+        ]
+      }
+   ],
+   "socketDelay":500
+}
