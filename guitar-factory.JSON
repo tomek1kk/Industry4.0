@@ -448,7 +448,7 @@
    ],
    "simulation":[
       {
-         "duration":100000,
+         "duration":60000,
         "demandedProducts": [
           {
             "name": "acustic guitar",
@@ -466,7 +466,27 @@
             "priority": 4
           }
         ]
-      }
+      },
+     {
+       "duration":30000,
+       "demandedProducts": [
+         {
+           "name": "acustic guitar",
+           "amount": 3,
+           "priority": 6
+         },
+         {
+           "name": "electric guitar",
+           "amount": 2,
+           "priority": 4
+         },
+         {
+           "name": "classic guitar",
+           "amount": 2,
+           "priority": 4
+         }
+       ]
+     }
    ],
    "socketDelay":500
 }
