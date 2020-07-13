@@ -40,17 +40,6 @@ public class GUIFrame extends JFrame {
         finishedProducts.add(new JLabel("Finished products: ", SwingConstants.CENTER));
         finishedProducts.setLocation(0, 400);
 
-//        ic.products.values().forEach(value -> {
-//            ordered.put(value.name, 0);
-//            produced.put(value.name, 0);
-//            orderedLabel.put(value.name, new JLabel("0", SwingConstants.CENTER));
-//            producedLabel.put(value.name, new JLabel("0", SwingConstants.CENTER));
-//            finishedProducts.add(new JLabel(value.name + " ", SwingConstants.CENTER));
-//            finishedProducts.add(producedLabel.get(value.name));
-//            finishedProducts.add(new JLabel("/", SwingConstants.CENTER));
-//            finishedProducts.add(orderedLabel.get(value.name));
-//        });
-
         add(finishedProducts);
         add(mainPanel);
 
