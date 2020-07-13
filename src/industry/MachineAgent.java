@@ -563,8 +563,9 @@ public class MachineAgent extends Agent {
         @Override
         protected void onTick() {
             if (!machine.active && recievedAllComponents) {
+                //System.out.println("Reasigment task");
                 recievedAllComponents = true;
-                if (machine.active) {
+                //if (!machine.active) {
                     for (int i = 9; i >= 0; i--) { // priority of actions
                         for (int j = 0; j < ProduceList.get(i).size(); j++) {
                             if (ProduceList.get(i).get(j)._readyToProduce) {
@@ -581,7 +582,7 @@ public class MachineAgent extends Agent {
                             ContainerController cc = getContainerController();
                             Object[] args = new Object[1];
                             args[0] = new BreakdownArgs(currProdElement._planMessage.GetProductName(), currProdElement._planMessage.GetStageId());
-                            AgentController ac = cc.createNewAgent("BreakdownAgent_" + machine.machineId, "industry.BreakDownAgent", args);
+                            AgentController ac = cc.createNewAgent("BreakdownAgent_" + machine.machineId + currProdElement._planMessage.getId(), "industry.BreakDownAgent", args);
                             ac.start();
                             currProdElement = null;
                         } catch (StaleProxyException e) {
@@ -589,7 +590,7 @@ public class MachineAgent extends Agent {
                         }
                     }
                 }
-            }
+            //}
         }
     };
 

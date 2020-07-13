@@ -10,6 +10,7 @@ import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
+import java.nio.channels.ScatteringByteChannel;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,21 +35,25 @@ public class BreakDownAgent extends Agent {
         @Override
         public void action() {
             int bestTime = Integer.MAX_VALUE;
-            for (Map.Entry<Integer, Machine> entry : ic.machines.entrySet()) {
-                Integer key = entry.getKey();
-                Machine value = entry.getValue();
+            try {
+                for (Map.Entry<Integer, Machine> entry : ic.machines.entrySet()) {
+                    Integer key = entry.getKey();
+                    Machine value = entry.getValue();
 
-                List<MachineAction> result = value.actions.stream()
-                        .filter(item -> item.productName.equals(productName) && item.stageId == stageId)
-                        .collect(Collectors.toList());
-                if(result == null) //no other machines doing the same work
-                    continue;
+                    List<MachineAction> result = value.actions.stream()
+                            .filter(item -> item.productName.equals(productName) && item.stageId == stageId)
+                            .collect(Collectors.toList());
+                    if (result == null) //no other machines doing the same work
+                        continue;
 
-                if(result.get(0).productionTime < bestTime)
-                {
-                    bestTime = result.get(0).productionTime;
-                    replacement = key;
+                    if (result.get(0).productionTime < bestTime) {
+                        bestTime = result.get(0).productionTime;
+                        replacement = key;
+                    }
                 }
+            }
+            catch(Exception e) {
+                System.out.println("No replacement found to produce " + productName);
             }
         }
     };
@@ -58,6 +63,7 @@ public class BreakDownAgent extends Agent {
         public void action() {
             if(replacement!= Integer.MIN_VALUE)
             {
+                System.out.println("Replacement found: Machine " + replacement);
             }
         }
     };

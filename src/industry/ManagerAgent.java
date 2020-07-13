@@ -177,11 +177,18 @@ public class ManagerAgent extends Agent {
                         JsonArray simulations = jsonObject.get("simulation").getAsJsonArray();
                         simulations.forEach(s -> parseSimulationObject(s.getAsJsonObject(), ic));
 
-                        int delay = jsonObject.get("socketDelay").getAsInt();
-                        ic.addSocketDelay(delay);
-                  
-                        JsonArray breakdowns = jsonObject.get("breakdown").getAsJsonArray();
-                        breakdowns.forEach(b -> parseBreakDownObject(b.getAsJsonObject(), ic));
+                        try {
+                            int delay = jsonObject.get("socketDelay").getAsInt();
+                            ic.addSocketDelay(delay);
+
+                            JsonArray breakdowns = jsonObject.get("breakdown").getAsJsonArray();
+                            breakdowns.forEach(b -> parseBreakDownObject(b.getAsJsonObject(), ic));
+                        }
+                        catch(Exception e)
+                        {
+
+                        }
+
 
                         reader.close();
                     }
