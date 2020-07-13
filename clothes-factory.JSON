@@ -295,7 +295,7 @@
       {
          "machineId" : 4,
          "breakTime" : 10000,
-         "duration" : 12000
+         "duration" : 20000
       }
    ],
    "socketDelay":55
