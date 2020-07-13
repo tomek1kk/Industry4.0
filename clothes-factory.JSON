@@ -131,16 +131,16 @@
          "socketId":4,
          "actions":[
             {
-               "productName":"hooded",
-               "stageId":3,
-               "actionName":"add hood",
-               "productionTime":10000
+               "productName":"t-shirt",
+               "stageId":1,
+               "actionName":"stitch",
+               "productionTime":12000
             },
             {
                "productName":"hooded",
-               "stageId":4,
-               "actionName":"add printing",
-               "productionTime":12000
+               "stageId":1,
+               "actionName":"stitch",
+               "productionTime":15000
             }
          ]
       }
