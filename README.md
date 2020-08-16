@@ -51,6 +51,6 @@ Agent simulate mechanic in factory. After breakdown, it turns off machine for ti
 
 ## Project demo
 
-
+![alt text](https://github.com/tomek1kk/Industry4.0/blob/master/factory-demo.JPG?raw=true "Factory")
 
 Sample configurations are defined in files: guitar-factory.json, clothes-factory.json, simple_confiq.json.
